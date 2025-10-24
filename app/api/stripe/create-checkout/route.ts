@@ -8,11 +8,19 @@ import { createClient } from "@/lib/supabase/server";
  * Creates a Stripe Checkout session for plan subscription
  */
 export async function POST(request: NextRequest) {
+  console.log("\n" + "=".repeat(70));
+  console.log("[CHECKOUT] 🛒 Creating checkout session");
+  console.log("=".repeat(70));
+
   try {
     const body = await request.json();
     const { planId, email } = body;
 
+    console.log("[CHECKOUT] Plan ID:", planId);
+    console.log("[CHECKOUT] Email:", email);
+
     if (!planId || !email) {
+      console.error("[CHECKOUT] ❌ Missing planId or email");
       return NextResponse.json(
         { error: "Plan ID and email are required" },
         { status: 400 }
@@ -21,10 +29,15 @@ export async function POST(request: NextRequest) {
 
     const plan = getPlanById(planId);
     if (!plan) {
+      console.error("[CHECKOUT] ❌ Invalid plan ID:", planId);
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
+    console.log("[CHECKOUT] ✓ Plan found:", plan.name);
+    console.log("[CHECKOUT] ✓ Stripe Price ID:", plan.stripePriceId);
+
     if (!plan.stripePriceId) {
+      console.error("[CHECKOUT] ❌ Plan missing Stripe Price ID");
       return NextResponse.json(
         { error: "Plan does not have a Stripe Price ID configured" },
         { status: 400 }
@@ -37,17 +50,22 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
+      console.error("[CHECKOUT] ❌ User not authenticated");
       return NextResponse.json(
         { error: "User not authenticated" },
         { status: 401 }
       );
     }
 
+    console.log("[CHECKOUT] ✓ User authenticated:", user.id);
+    console.log("[CHECKOUT] Creating Stripe session...");
+
     // Create Stripe Checkout Session using the real Price ID
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       customer_email: email,
+      client_reference_id: user.id, // Also send userId here (backup)
       line_items: [
         {
           price: plan.stripePriceId, // Use the actual Stripe Price ID
@@ -58,24 +76,49 @@ export async function POST(request: NextRequest) {
         plan.trialDays && plan.trialDays > 0
           ? {
               trial_period_days: plan.trialDays,
+              metadata: {
+                userId: user.id,
+                planId,
+              },
             }
-          : undefined,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/register?step=8&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/register?step=6`,
+          : {
+              metadata: {
+                userId: user.id,
+                planId,
+              },
+            },
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-processing?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/register?step=6&payment=cancelled`,
       metadata: {
         userId: user.id,
         planId,
       },
     });
 
+    console.log("[CHECKOUT] ✅ Stripe session created successfully");
+    console.log("[CHECKOUT] Session ID:", session.id);
+    console.log("[CHECKOUT] Checkout URL:", session.url);
+    console.log("=".repeat(70) + "\n");
+
     return NextResponse.json({
       url: session.url,
       sessionId: session.id,
     });
   } catch (error) {
-    console.error("Checkout creation error:", error);
+    console.error("=".repeat(70));
+    console.error("[CHECKOUT] 💥 Error creating checkout session:");
+    console.error("[CHECKOUT] Error:", error);
+    if (error instanceof Error) {
+      console.error("[CHECKOUT] Message:", error.message);
+      console.error("[CHECKOUT] Stack:", error.stack);
+    }
+    console.error("=".repeat(70));
+
     return NextResponse.json(
-      { error: "Failed to create checkout session" },
+      {
+        error: "Failed to create checkout session",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

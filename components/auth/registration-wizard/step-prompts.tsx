@@ -34,11 +34,14 @@ export function StepPrompts() {
 
   const [newCustomPrompt, setNewCustomPrompt] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [usingFallback, setUsingFallback] = useState(false);
 
   const generatePrompts = useCallback(async () => {
     setGeneratingPrompts(true);
     try {
       const domain = extractDomain(email || "");
+      console.log("Generating prompts for domain:", domain);
+
       const response = await fetch("/api/prompts/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,13 +54,18 @@ export function StepPrompts() {
         throw new Error(result.error);
       }
 
+      console.log("Received prompts:", result.prompts);
+
       setGeneratedPrompts(result.prompts);
+      setUsingFallback(result.usingFallback || false);
+
       // Auto-select first 5 prompts
       setSelectedPrompts(
         result.prompts.slice(0, 5).map((p: GeneratedPrompt) => p.text)
       );
     } catch (error) {
       console.error("Error generating prompts:", error);
+      alert("Failed to generate prompts. Please try again or contact support.");
     } finally {
       setGeneratingPrompts(false);
     }
@@ -121,6 +129,16 @@ export function StepPrompts() {
         <p className="text-muted-foreground">Select up to 10 topics</p>
       </div>
 
+      {usingFallback && (
+        <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4">
+          <p className="text-sm text-yellow-700 dark:text-yellow-400">
+            ℹ️ Using generic prompts. To get AI-powered personalized prompts
+            based on your company, configure OpenAI API key in your environment
+            variables.
+          </p>
+        </div>
+      )}
+
       <div className="space-y-3">
         {generatedPrompts.map((prompt, index) => (
           <div
@@ -150,7 +168,13 @@ export function StepPrompts() {
             key={`custom-${index}`}
             className="flex items-start space-x-3 rounded-lg border border-primary/50 bg-primary/5 p-4"
           >
-            <Checkbox checked={true} disabled />
+            <Checkbox
+              checked={true}
+              disabled
+              onCheckedChange={() => {
+                /* Custom prompts are always selected */
+              }}
+            />
             <Label className="flex-1 font-normal leading-tight">{prompt}</Label>
           </div>
         ))}
@@ -199,17 +223,9 @@ export function StepPrompts() {
       </div>
 
       <div className="flex gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={previousStep}
-          className="w-32"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
-        <Button onClick={handleContinue} className="flex-1">
-          Looks good
+        {/* Back button removed after email verification to prevent navigation issues */}
+        <Button onClick={handleContinue} className="w-full">
+          Continue
         </Button>
       </div>
     </div>

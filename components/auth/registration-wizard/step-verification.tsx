@@ -23,19 +23,24 @@ export function StepVerification() {
 
   // Start countdown on mount
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          setCanResend(true);
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (countdown === 0) {
+      setCanResend(true);
+      return;
+    }
 
-    return () => clearInterval(timer);
-  }, []);
+    if (!canResend) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [countdown, canResend]);
 
   const handleVerify = async () => {
     if (otp.length !== 6) return;
@@ -66,17 +71,24 @@ export function StepVerification() {
 
   const handleResend = async () => {
     try {
-      await fetch("/api/auth/resend-otp", {
+      const response = await fetch("/api/auth/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
+      if (!response.ok) {
+        throw new Error("Failed to resend code");
+      }
+
+      // Reset countdown and disable resend button
       setCanResend(false);
       setCountdown(60);
-      // Restart countdown...
+
+      alert("Code sent! Check your email.");
     } catch (error) {
       console.error("Resend error:", error);
+      alert("Failed to resend code. Please try again.");
     }
   };
 

@@ -14,21 +14,25 @@ export function StepWelcome() {
   const { firstName, reset } = useRegistrationStore();
   const router = useRouter();
 
-  useEffect(() => {
-    // Create workspace and initialize prompts in background
-    initializeWorkspace();
-  }, []);
+  // ===== MVP: WORKSPACE INITIALIZATION DISABLED =====
+  // Workspace should ONLY be created after successful payment via Stripe webhook
+  // Do NOT create workspace without payment verification
 
-  const initializeWorkspace = async () => {
-    try {
-      await fetch("/api/workspace/initialize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      console.error("Error initializing workspace:", error);
-    }
-  };
+  // useEffect(() => {
+  //   // Create workspace and initialize prompts in background
+  //   initializeWorkspace();
+  // }, []);
+
+  // const initializeWorkspace = async () => {
+  //   try {
+  //     await fetch("/api/workspace/initialize", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //     });
+  //   } catch (error) {
+  //     console.error("Error initializing workspace:", error);
+  //   }
+  // };
 
   const handleContinue = () => {
     // Clear registration state

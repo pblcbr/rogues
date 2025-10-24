@@ -27,19 +27,27 @@ export const PLANS: Record<string, PricingPlan> = {
     price: 99,
     interval: "month",
     stripePriceId: "price_1SLSzGLlfnJ045i4EQxm8k8X",
-    features: [
-      "50 unique prompts",
-      "1 answer engine — ChatGPT",
-      "1 seat",
-      "Basic visibility tracking",
-      "Email support",
-    ],
+    features: ["50 unique prompts", "1 answer engine — ChatGPT", "1 seat"],
     limits: {
       prompts: 50,
       engines: 1,
       seats: 1,
     },
     trialDays: 0, // No trial for Starter
+  },
+  "starter-yearly": {
+    id: "starter-yearly",
+    name: "Starter",
+    price: 990, // $99 x 10 (2 months free)
+    interval: "year",
+    stripePriceId: "price_1SLhORLlfnJ045i4nZIKOWkS",
+    features: ["50 unique prompts", "1 answer engine — ChatGPT", "1 seat"],
+    limits: {
+      prompts: 50,
+      engines: 1,
+      seats: 1,
+    },
+    trialDays: 0,
   },
   growth: {
     id: "growth",
@@ -52,8 +60,27 @@ export const PLANS: Record<string, PricingPlan> = {
       "3 answer engines — ChatGPT, Perplexity, Google AI",
       "3 seats",
       "6 optimized articles per month",
-      "Advanced analytics",
-      "Priority support",
+    ],
+    limits: {
+      prompts: 100,
+      engines: 3,
+      seats: 3,
+      articles: 6,
+    },
+    popular: true,
+    trialDays: 7,
+  },
+  "growth-yearly": {
+    id: "growth-yearly",
+    name: "Growth",
+    price: 3990, // $399 x 10 (2 months free)
+    interval: "year",
+    stripePriceId: "price_1SLhOsLlfnJ045i4vMz8eD0E",
+    features: [
+      "100 unique prompts",
+      "3 answer engines — ChatGPT, Perplexity, Google AI",
+      "3 seats",
+      "6 optimized articles per month",
     ],
     limits: {
       prompts: 100,

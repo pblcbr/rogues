@@ -23,8 +23,26 @@ export default function AuthLayout({
       </div>
 
       {/* Right side - Testimonials */}
-      <div className="hidden lg:flex lg:w-1/2 lg:flex-col lg:bg-muted">
-        <div className="flex flex-1 items-center justify-center p-8">
+      <div className="hidden lg:relative lg:flex lg:w-1/2 lg:flex-col lg:overflow-hidden">
+        {/* Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source
+            src="/7020028_Background_Screensaver_3840x2160.mp4"
+            type="video/mp4"
+          />
+        </video>
+
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/50" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-1 items-center justify-center p-8">
           <div className="w-full max-w-lg">
             <TestimonialCarousel />
           </div>

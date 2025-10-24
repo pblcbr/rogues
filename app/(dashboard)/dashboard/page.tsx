@@ -1,5 +1,6 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { AEVTrendChart } from "@/components/dashboard/aev-trend-chart";
 import { TopPromptsTable } from "@/components/dashboard/top-prompts-table";
@@ -28,6 +29,13 @@ export default async function DashboardPage() {
     .select("*, workspaces(*)")
     .eq("id", session.user.id)
     .single();
+
+  // ===== MVP: PAYMENT REQUIRED =====
+  // Block access if user doesn't have a workspace (no payment completed)
+  if (!profile?.workspace_id) {
+    // Payment is MANDATORY - redirect to pricing
+    redirect("/register?step=6");
+  }
 
   const { data: prompts } = await supabase
     .from("monitoring_prompts")

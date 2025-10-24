@@ -24,11 +24,25 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("OTP resend error:", error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
+
+      // Provide more helpful error messages
+      let errorMessage = error.message;
+      if (error.message.includes("rate limit")) {
+        errorMessage =
+          "Please wait 60 seconds between resend attempts. If you still don't receive the email after multiple attempts, check your spam folder or use /debug-registration to troubleshoot.";
+      } else if (error.message.includes("email not found")) {
+        errorMessage =
+          "Email not found. Please start the registration process again or use /debug-registration to check your account status.";
+      }
+
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
+    console.log("OTP resent successfully for:", email);
+
     return NextResponse.json({
-      message: "OTP resent successfully",
+      message:
+        "Verification code resent successfully. Please check your email (including spam folder).",
     });
   } catch (error) {
     console.error("OTP resend error:", error);

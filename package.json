@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "test:openai": "node scripts/test-openai.mjs",
+    "check:env": "node -e \"require('dotenv').config({path:'.env.local'});console.log('OpenAI Key:', process.env.OPENAI_API_KEY ? 'SET (' + process.env.OPENAI_API_KEY.substring(0,10) + '...)' : 'NOT SET')\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

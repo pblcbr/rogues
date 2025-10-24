@@ -121,9 +121,17 @@ export const useRegistrationStore = create<RegistrationState>()(
         })),
 
       previousStep: () =>
-        set((state) => ({
-          currentStep: Math.max(state.currentStep - 1, 1),
-        })),
+        set((state) => {
+          // Don't allow going back after email verification (step 4)
+          // This prevents users from getting stuck or re-doing auth steps
+          if (state.isEmailVerified && state.currentStep <= 5) {
+            console.warn("Cannot go back after email verification");
+            return state;
+          }
+          return {
+            currentStep: Math.max(state.currentStep - 1, 1),
+          };
+        }),
 
       reset: () => set(initialState),
     }),

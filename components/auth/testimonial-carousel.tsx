@@ -53,15 +53,15 @@ export function TestimonialCarousel() {
   return (
     <div className="space-y-8">
       {/* Main testimonial card */}
-      <div className="rounded-lg border border-border bg-background p-8 shadow-lg transition-all duration-500">
-        <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
+      <div className="rounded-lg border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md transition-all duration-500">
+        <p className="mb-6 text-lg leading-relaxed text-white/90">
           &quot;{current.quote}&quot;
         </p>
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/60" />
           <div>
-            <p className="font-semibold">{current.author}</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="font-semibold text-white">{current.author}</p>
+            <p className="text-sm text-white/70">
               {current.role}, {current.company}
             </p>
           </div>
@@ -76,8 +76,8 @@ export function TestimonialCarousel() {
             onClick={() => setCurrentIndex(index)}
             className={`h-2 w-2 rounded-full transition-all ${
               index === currentIndex
-                ? "w-8 bg-primary"
-                : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                ? "w-8 bg-white"
+                : "bg-white/30 hover:bg-white/50"
             }`}
             aria-label={`Go to testimonial ${index + 1}`}
           />

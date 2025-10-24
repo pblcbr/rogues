@@ -32,11 +32,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Redirect to dashboard if trying to access auth routes while authenticated
+  // Redirect to dashboard ONLY if user has completed payment (has workspace)
   if (isAuthRoute && session) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
-    return NextResponse.redirect(redirectUrl);
+    // Check if user has workspace_id (payment completed)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("workspace_id")
+      .eq("id", session.user.id)
+      .single();
+
+    // Only redirect to dashboard if they have a workspace (paid)
+    // If no workspace, they're still completing registration/payment - allow access to /register
+    if (profile?.workspace_id) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/dashboard";
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   return res;
