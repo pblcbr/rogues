@@ -49,6 +49,14 @@ export function StepCompany() {
 
   const onSubmit = (data: CompanyFormData) => {
     setCompanyInfo(data.companySize, data.isAgency);
+    // If the user is an agency, open calendar in new tab and block progression
+    if (data.isAgency) {
+      window.open(
+        "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2xjxyVEPpzR3bCNnffsnvpOiqhCfh2qzAzX2UmWrzLVJEF6FuoPTetbophNBB7vDiqdBKjdnDq",
+        "_blank"
+      );
+      return;
+    }
     nextStep();
   };
 

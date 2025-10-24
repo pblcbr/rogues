@@ -6,17 +6,20 @@ import { StepEmail } from "./step-email";
 import { StepCompany } from "./step-company";
 import { StepAccount } from "./step-account";
 import { StepVerification } from "./step-verification";
-import { StepPrompts } from "./step-prompts";
+import { StepBrand } from "./step-brand";
+import { StepRegion } from "./step-region";
+import { StepVisibility } from "./step-visibility";
+import { StepTopics } from "./step-topics";
 import { StepPricing } from "./step-pricing";
 import { StepPayment } from "./step-payment";
 import { StepWelcome } from "./step-welcome";
 
 /**
  * Registration Wizard - Main orchestrator component
- * Manages the 8-step registration flow
+ * Manages the 11-step registration flow
  *
  * MVP: Step 4 (Email Verification) is currently skipped
- * The flow goes: 1→2→3→5→6→7→8 (Step 4 bypassed)
+ * The flow goes: 1→2→3→5→6→7→8→9→10→11 (Step 4 bypassed)
  */
 export function RegistrationWizard() {
   const { currentStep, email, userId, setStep } = useRegistrationStore();
@@ -59,12 +62,18 @@ export function RegistrationWizard() {
         // To re-enable: Just return <StepVerification /> and update step-account.tsx
         return <StepVerification />; // Kept in case someone accesses directly
       case 5:
-        return <StepPrompts />;
+        return <StepBrand />;
       case 6:
-        return <StepPricing />;
+        return <StepRegion />;
       case 7:
-        return <StepPayment />;
+        return <StepVisibility />;
       case 8:
+        return <StepTopics />;
+      case 9:
+        return <StepPricing />;
+      case 10:
+        return <StepPayment />;
+      case 11:
         return <StepWelcome />;
       default:
         return <StepEmail />;

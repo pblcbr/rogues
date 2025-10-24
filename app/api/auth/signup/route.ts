@@ -21,11 +21,14 @@ export async function POST(request: NextRequest) {
     console.log("[SIGNUP] [1/7] Parsing request body...");
     const body = await request.json();
     console.log("[SIGNUP] Body received:", JSON.stringify(body, null, 2));
-    const { email, password, firstName, lastName } = body;
+    const { email, password, firstName, lastName, companySize, isAgency } =
+      body;
     console.log("[SIGNUP] ✓ Body parsed");
     console.log("[SIGNUP]   - Email:", email);
     console.log("[SIGNUP]   - First Name:", firstName);
     console.log("[SIGNUP]   - Last Name:", lastName);
+    console.log("[SIGNUP]   - Company Size:", companySize);
+    console.log("[SIGNUP]   - Is Agency:", isAgency);
     console.log("[SIGNUP]   - Password length:", password?.length || 0);
 
     // STEP 2: Validate required fields
@@ -184,16 +187,39 @@ export async function POST(request: NextRequest) {
 
     // STEP 7: Create profile (manual fallback if trigger doesn't work)
     console.log("[SIGNUP] [7/7] Creating profile...");
+
+    // Extract domain from email for company_domain
+    const emailDomain = email.split("@")[1] || null;
+
     const { error: profileError } = await supabase.from("profiles").insert({
       id: data.user.id,
       email: data.user.email,
       first_name: firstName,
       last_name: lastName,
+      company_domain: emailDomain,
+      company_size: companySize || null,
+      is_agency: isAgency || false,
     });
 
     if (profileError) {
       // Profile might already exist from trigger, that's OK
       console.log("[SIGNUP] ⚠️ Profile creation note:", profileError.message);
+
+      // If profile exists, update it with company info
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          company_domain: emailDomain,
+          company_size: companySize || null,
+          is_agency: isAgency || false,
+        })
+        .eq("id", data.user.id);
+
+      if (updateError) {
+        console.log("[SIGNUP] ⚠️ Profile update note:", updateError.message);
+      } else {
+        console.log("[SIGNUP] ✓ Profile updated with company info");
+      }
     } else {
       console.log("[SIGNUP] ✓ Profile created successfully");
     }

@@ -147,6 +147,12 @@ export async function POST(request: NextRequest) {
           console.log("[STRIPE WEBHOOK] ✓ Profile updated with workspace_id");
         }
 
+        // Note: Topics will be saved by the frontend after payment-processing page
+        // via /api/workspace/initialize endpoint, which has access to Zustand store
+        console.log(
+          "[STRIPE WEBHOOK] ℹ️ Topics will be saved by frontend after redirect"
+        );
+
         console.log(
           "[STRIPE WEBHOOK] ✅ Checkout completed successfully for user:",
           userId

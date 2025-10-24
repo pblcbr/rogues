@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { GeneratedPrompt } from "@/lib/openai/prompt-generator";
+import type { GeneratedTopic } from "@/lib/openai/topic-generator";
+import type { VisibilityAnalysis } from "@/lib/openai/visibility-analyzer";
 
 /**
  * Registration flow state management
@@ -22,20 +23,32 @@ export interface RegistrationState {
   firstName: string | null;
   lastName: string | null;
 
-  // Step 4: Verification
+  // Step 4: Verification (MVP: disabled)
   isEmailVerified: boolean;
   userId: string | null;
 
-  // Step 5: Prompts
-  generatedPrompts: GeneratedPrompt[];
-  selectedPrompts: string[];
-  customPrompts: string[];
-  isGeneratingPrompts: boolean;
+  // Step 5: Brand Information
+  brandWebsite: string | null;
+  brandDescription: string | null;
 
-  // Step 6: Plan
+  // Step 6: Region & Language
+  region: string | null;
+  language: string | null;
+
+  // Step 7: Visibility Analysis
+  visibilityAnalysis: VisibilityAnalysis | null;
+  isAnalyzingVisibility: boolean;
+
+  // Step 8: Topics
+  generatedTopics: GeneratedTopic[];
+  selectedTopics: string[];
+  customTopics: string[];
+  isGeneratingTopics: boolean;
+
+  // Step 9: Plan
   selectedPlan: string | null;
 
-  // Step 7: Payment
+  // Step 10: Payment
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
 
@@ -44,12 +57,16 @@ export interface RegistrationState {
   setEmail: (email: string) => void;
   setCompanyInfo: (size: string, isAgency: boolean) => void;
   setAccountInfo: (firstName: string, lastName: string) => void;
+  setBrandInfo: (website: string, description: string) => void;
+  setRegionLanguage: (region: string, language: string) => void;
+  setVisibilityAnalysis: (analysis: VisibilityAnalysis) => void;
+  setAnalyzingVisibility: (isAnalyzing: boolean) => void;
   setEmailVerified: (userId: string) => void;
-  setGeneratedPrompts: (prompts: GeneratedPrompt[]) => void;
-  setSelectedPrompts: (prompts: string[]) => void;
-  addCustomPrompt: (prompt: string) => void;
-  removeCustomPrompt: (prompt: string) => void;
-  setGeneratingPrompts: (isGenerating: boolean) => void;
+  setGeneratedTopics: (topics: GeneratedTopic[]) => void;
+  setSelectedTopics: (topics: string[]) => void;
+  addCustomTopic: (topic: string) => void;
+  removeCustomTopic: (topic: string) => void;
+  setGeneratingTopics: (isGenerating: boolean) => void;
   setSelectedPlan: (plan: string) => void;
   setStripeInfo: (customerId: string, subscriptionId: string) => void;
   nextStep: () => void;
@@ -64,12 +81,18 @@ const initialState = {
   isAgency: false,
   firstName: null,
   lastName: null,
+  brandWebsite: null,
+  brandDescription: null,
+  region: null,
+  language: null,
   isEmailVerified: false,
   userId: null,
-  generatedPrompts: [],
-  selectedPrompts: [],
-  customPrompts: [],
-  isGeneratingPrompts: false,
+  visibilityAnalysis: null,
+  isAnalyzingVisibility: false,
+  generatedTopics: [],
+  selectedTopics: [],
+  customTopics: [],
+  isGeneratingTopics: false,
   selectedPlan: null,
   stripeCustomerId: null,
   stripeSubscriptionId: null,
@@ -88,24 +111,35 @@ export const useRegistrationStore = create<RegistrationState>()(
 
       setAccountInfo: (firstName, lastName) => set({ firstName, lastName }),
 
+      setBrandInfo: (website, description) =>
+        set({ brandWebsite: website, brandDescription: description }),
+
+      setRegionLanguage: (region, language) => set({ region, language }),
+
+      setVisibilityAnalysis: (analysis) =>
+        set({ visibilityAnalysis: analysis }),
+
+      setAnalyzingVisibility: (isAnalyzing) =>
+        set({ isAnalyzingVisibility: isAnalyzing }),
+
       setEmailVerified: (userId) => set({ isEmailVerified: true, userId }),
 
-      setGeneratedPrompts: (prompts) => set({ generatedPrompts: prompts }),
+      setGeneratedTopics: (topics) => set({ generatedTopics: topics }),
 
-      setSelectedPrompts: (prompts) => set({ selectedPrompts: prompts }),
+      setSelectedTopics: (topics) => set({ selectedTopics: topics }),
 
-      addCustomPrompt: (prompt) =>
+      addCustomTopic: (topic) =>
         set((state) => ({
-          customPrompts: [...state.customPrompts, prompt],
+          customTopics: [...state.customTopics, topic],
         })),
 
-      removeCustomPrompt: (prompt) =>
+      removeCustomTopic: (topic) =>
         set((state) => ({
-          customPrompts: state.customPrompts.filter((p) => p !== prompt),
+          customTopics: state.customTopics.filter((t) => t !== topic),
         })),
 
-      setGeneratingPrompts: (isGenerating) =>
-        set({ isGeneratingPrompts: isGenerating }),
+      setGeneratingTopics: (isGenerating) =>
+        set({ isGeneratingTopics: isGenerating }),
 
       setSelectedPlan: (plan) => set({ selectedPlan: plan }),
 
@@ -117,14 +151,14 @@ export const useRegistrationStore = create<RegistrationState>()(
 
       nextStep: () =>
         set((state) => ({
-          currentStep: Math.min(state.currentStep + 1, 8),
+          currentStep: Math.min(state.currentStep + 1, 11),
         })),
 
       previousStep: () =>
         set((state) => {
           // Don't allow going back after email verification (step 4)
           // This prevents users from getting stuck or re-doing auth steps
-          if (state.isEmailVerified && state.currentStep <= 5) {
+          if (state.isEmailVerified && state.currentStep <= 8) {
             console.warn("Cannot go back after email verification");
             return state;
           }
@@ -145,9 +179,13 @@ export const useRegistrationStore = create<RegistrationState>()(
         isAgency: state.isAgency,
         firstName: state.firstName,
         lastName: state.lastName,
-        generatedPrompts: state.generatedPrompts,
-        selectedPrompts: state.selectedPrompts,
-        customPrompts: state.customPrompts,
+        brandWebsite: state.brandWebsite,
+        brandDescription: state.brandDescription,
+        region: state.region,
+        language: state.language,
+        generatedTopics: state.generatedTopics,
+        selectedTopics: state.selectedTopics,
+        customTopics: state.customTopics,
         selectedPlan: state.selectedPlan,
       }),
     }

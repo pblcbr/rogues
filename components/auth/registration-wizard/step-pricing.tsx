@@ -11,8 +11,20 @@ import { Check, X, Sparkles } from "lucide-react";
  * Full-screen modal with unique pricing design
  */
 export function StepPricing() {
-  const { email, setSelectedPlan, nextStep, previousStep } =
-    useRegistrationStore();
+  const {
+    email,
+    brandWebsite,
+    brandDescription,
+    region,
+    language,
+    visibilityAnalysis,
+    generatedTopics,
+    selectedTopics,
+    customTopics,
+    setSelectedPlan,
+    nextStep,
+    previousStep,
+  } = useRegistrationStore();
   const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">(
     "monthly"
   );
@@ -51,6 +63,16 @@ export function StepPricing() {
         body: JSON.stringify({
           planId,
           email,
+          registrationData: {
+            brandWebsite,
+            brandDescription,
+            region,
+            language,
+            visibilityAnalysis,
+            generatedTopics,
+            selectedTopics,
+            customTopics,
+          },
         }),
       });
 

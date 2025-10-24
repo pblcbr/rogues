@@ -21,8 +21,15 @@ import { createClient } from "@/lib/supabase/client";
  * Collects user details and creates Supabase account
  */
 export function StepAccount() {
-  const { email, setAccountInfo, setEmailVerified, nextStep, previousStep } =
-    useRegistrationStore();
+  const {
+    email,
+    companySize,
+    isAgency,
+    setAccountInfo,
+    setEmailVerified,
+    nextStep,
+    previousStep,
+  } = useRegistrationStore();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,6 +127,8 @@ export function StepAccount() {
           password: data.password,
           firstName: data.firstName,
           lastName: data.lastName,
+          companySize,
+          isAgency,
         }),
       });
 
@@ -176,6 +185,7 @@ export function StepAccount() {
         // To re-enable: Remove the double nextStep() and uncomment code below
         console.log("⚡ [MVP] Skipping email verification, going to prompts");
         nextStep(); // Skip verification step (step 4)
+        // Switch to a full-screen experience (hide testimonials) by navigating to prompts in focused mode
         nextStep(); // Go directly to prompts (step 5)
         return;
 

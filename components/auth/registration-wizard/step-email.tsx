@@ -47,7 +47,7 @@ export function StepEmail() {
         <h1 className="text-3xl font-bold tracking-tight">
           What&apos;s your email?
         </h1>
-        <p className="text-muted-foreground">Create your account or sign in.</p>
+        <p className="text-muted-foreground">Create your account.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -71,11 +71,49 @@ export function StepEmail() {
       </form>
 
       <div className="rounded-lg border border-border bg-muted/50 p-6">
-        <h3 className="mb-2 font-semibold">Want a demo?</h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Schedule a call with one of our experts
-        </p>
-        <Button variant="outline" className="w-full">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="mb-2 font-semibold">Want a demo?</h3>
+            <p className="text-sm text-muted-foreground">
+              Schedule a call with one of our experts
+            </p>
+          </div>
+          <div className="hidden shrink-0 items-center -space-x-2 sm:flex">
+            {/* Circular avatars from public images */}
+            <img
+              src="/Captura de pantalla 2024-07-05 a las 13.51.43.png"
+              alt="Customer avatar"
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-background"
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="/Captura de pantalla 2025-10-24 a las 23.46.46.png"
+              alt="Customer avatar"
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-background"
+              loading="lazy"
+              decoding="async"
+            />
+            <img
+              src="/Captura de pantalla 2025-10-24 a las 23.47.00.png"
+              alt="Customer avatar"
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-background"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
+
+        <Button
+          variant="outline"
+          className="mt-4 w-full"
+          onClick={() =>
+            window.open(
+              "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ2xjxyVEPpzR3bCNnffsnvpOiqhCfh2qzAzX2UmWrzLVJEF6FuoPTetbophNBB7vDiqdBKjdnDq",
+              "_blank"
+            )
+          }
+        >
           Schedule a Call →
         </Button>
       </div>

@@ -14,10 +14,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { planId, email } = body;
+    const {
+      planId,
+      email,
+      registrationData, // All registration data from Zustand store
+    } = body;
 
     console.log("[CHECKOUT] Plan ID:", planId);
     console.log("[CHECKOUT] Email:", email);
+    console.log("[CHECKOUT] Has registration data:", !!registrationData);
 
     if (!planId || !email) {
       console.error("[CHECKOUT] ❌ Missing planId or email");
@@ -58,6 +63,33 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("[CHECKOUT] ✓ User authenticated:", user.id);
+
+    // Save registration data to profile before creating checkout
+    // This ensures we have the data even if webhook fails
+    if (registrationData) {
+      console.log("[CHECKOUT] Saving registration data to profile...");
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({
+          brand_website: registrationData.brandWebsite,
+          brand_description: registrationData.brandDescription,
+          region: registrationData.region,
+          language: registrationData.language,
+          visibility_analysis: registrationData.visibilityAnalysis,
+        })
+        .eq("id", user.id);
+
+      if (updateError) {
+        console.error(
+          "[CHECKOUT] ⚠️ Failed to save registration data:",
+          updateError
+        );
+        // Continue anyway, we'll try again in webhook
+      } else {
+        console.log("[CHECKOUT] ✓ Registration data saved to profile");
+      }
+    }
+
     console.log("[CHECKOUT] Creating Stripe session...");
 
     // Create Stripe Checkout Session using the real Price ID
@@ -92,6 +124,9 @@ export async function POST(request: NextRequest) {
       metadata: {
         userId: user.id,
         planId,
+        // Store registration data as JSON string (Stripe metadata has 500 char limit per key)
+        // We'll store it in the database immediately after workspace creation
+        hasRegistrationData: registrationData ? "true" : "false",
       },
     });
 
