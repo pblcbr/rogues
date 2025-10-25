@@ -2,7 +2,6 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
-import { DashboardHeader } from "@/components/dashboard/header";
 import type { Database } from "@/lib/supabase/types";
 
 /**
@@ -23,7 +22,7 @@ export default async function DashboardLayout({
   } = await supabase.auth.getSession();
 
   if (!session) {
-    redirect("/register");
+    redirect("/login");
   }
 
   // Fetch user profile and workspace
@@ -36,13 +35,10 @@ export default async function DashboardLayout({
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <DashboardSidebar profile={profile} />
+      <DashboardSidebar profile={profile} userEmail={session.user.email} />
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Header */}
-        <DashboardHeader user={session.user} profile={profile} />
-
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>

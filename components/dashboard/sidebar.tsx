@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 import {
   LayoutDashboard,
   Target,
@@ -15,6 +17,7 @@ import {
 
 interface SidebarProps {
   profile: any;
+  userEmail?: string;
 }
 
 const navigation = [
@@ -31,8 +34,16 @@ const navigation = [
  * Dashboard Sidebar Navigation
  * Desktop-first vertical navigation
  */
-export function DashboardSidebar({ profile }: SidebarProps) {
+export function DashboardSidebar({ profile, userEmail }: SidebarProps) {
   const pathname = usePathname();
+  const supabase = createClient();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    await supabase.auth.signOut();
+    window.location.assign("/login");
+  };
 
   return (
     <div className="flex w-64 flex-col border-r border-gray-200 bg-white">
@@ -93,11 +104,36 @@ export function DashboardSidebar({ profile }: SidebarProps) {
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t border-gray-200 px-4 py-4">
-        <div className="flex items-center text-xs text-gray-500">
-          <span>AEV Score:</span>
-          <span className="ml-auto font-semibold text-green-600">8.2/10</span>
+      {/* User Profile (moved from header) */}
+      <div className="mt-auto border-t border-gray-200 px-4 py-4">
+        <div className="flex items-center space-x-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+            <span className="text-sm font-semibold">
+              {(profile?.first_name?.[0] || "U").toUpperCase()}
+            </span>
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-gray-900">
+              {profile?.first_name} {profile?.last_name}
+            </p>
+            <p className="truncate text-xs text-gray-500">{userEmail}</p>
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Link
+            href="/dashboard/settings"
+            className="inline-flex items-center justify-center rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Settings
+          </Link>
+          <button
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="inline-flex items-center justify-center rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+          >
+            {isSigningOut ? "Signing out..." : "Sign out"}
+          </button>
         </div>
       </div>
     </div>

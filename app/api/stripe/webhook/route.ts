@@ -147,11 +147,44 @@ export async function POST(request: NextRequest) {
           console.log("[STRIPE WEBHOOK] ✓ Profile updated with workspace_id");
         }
 
-        // Note: Topics will be saved by the frontend after payment-processing page
-        // via /api/workspace/initialize endpoint, which has access to Zustand store
-        console.log(
-          "[STRIPE WEBHOOK] ℹ️ Topics will be saved by frontend after redirect"
-        );
+        // Generate initial prompts from selected topics (if any exist)
+        try {
+          const { data: selectedTopics } = await supabase
+            .from("topics")
+            .select("name, description, category, keywords")
+            .eq("workspace_id", workspace.id)
+            .eq("is_selected", true);
+
+          if (selectedTopics && selectedTopics.length > 0) {
+            const { generatePromptsForTopics } = await import(
+              "@/lib/openai/prompt-from-topic"
+            );
+            const prompts = await generatePromptsForTopics(selectedTopics, 8);
+            const rows = prompts.map((p) => ({
+              workspace_id: workspace.id,
+              prompt_text: p.text,
+              topic: p.topic || null,
+              category: p.category || null,
+              is_active: true,
+              source: "ai_from_topic",
+            }));
+            if (rows.length > 0) {
+              await supabase.from("monitoring_prompts").insert(rows);
+              console.log(
+                `[STRIPE WEBHOOK] ✓ Inserted ${rows.length} prompts from topics`
+              );
+            }
+          } else {
+            console.log(
+              "[STRIPE WEBHOOK] No selected topics found yet; prompts will be generated later"
+            );
+          }
+        } catch (genErr) {
+          console.error(
+            "[STRIPE WEBHOOK] ⚠️ Prompt generation from topics failed:",
+            genErr
+          );
+        }
 
         console.log(
           "[STRIPE WEBHOOK] ✅ Checkout completed successfully for user:",
