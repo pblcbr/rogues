@@ -15,7 +15,7 @@ Esto abrirá el navegador para autorizar el acceso. Acepta la conexión.
 Ejecuta este comando (déjalo corriendo en una terminal):
 
 ```bash
-stripe listen --forward-to http://localhost:3003/api/stripe/webhook
+stripe listen --forward-to http://localhost:3000/api/stripe/webhook
 ```
 
 **¡IMPORTANTE!** Este comando te dará un **webhook signing secret** que empieza con `whsec_...`

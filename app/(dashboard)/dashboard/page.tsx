@@ -30,13 +30,6 @@ export default async function DashboardPage() {
     .eq("id", session.user.id)
     .single();
 
-  // ===== MVP: PAYMENT REQUIRED =====
-  // Block access if user doesn't have a workspace (no payment completed)
-  if (!profile?.workspace_id) {
-    // Payment is MANDATORY - redirect to pricing
-    redirect("/register?step=6");
-  }
-
   const { data: prompts } = await supabase
     .from("monitoring_prompts")
     .select("*")

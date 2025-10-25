@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X } from "lucide-react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/lib/supabase/client";
 
 interface Prompt {
   id: string;
@@ -34,7 +34,7 @@ interface EditPromptDialogProps {
  */
 export function EditPromptDialog({ prompt, children }: EditPromptDialogProps) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [promptText, setPromptText] = useState(prompt.prompt_text);
