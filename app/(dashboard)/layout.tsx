@@ -28,7 +28,14 @@ export default async function DashboardLayout({
   // Fetch user profile and workspace
   const { data: profile } = await supabase
     .from("profiles")
-    .select("*, workspaces(*)")
+    .select(
+      `
+      *,
+      workspaces(*),
+      current_workspace_id,
+      current_workspace_region_id
+    `
+    )
     .eq("id", session.user.id)
     .single();
 

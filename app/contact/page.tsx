@@ -52,7 +52,7 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-6 w-6 flex-shrink-0 text-green-500" />
                   <span className="text-base text-gray-300">
-                    Demo of the Rogues platform
+                    Demo of the tacmind platform
                   </span>
                 </div>
                 <div className="flex items-start gap-3">
@@ -67,7 +67,7 @@ export default function ContactPage() {
               <blockquote className="mt-16 border-l-4 border-gray-700 pl-6">
                 <p className="text-xl leading-relaxed text-gray-200">
                   "Identifying and analyzing LLM insights for AEO has been a key
-                  priority for the marketing team. Rogues allowed us to uncover
+                  priority for the marketing team. tacmind allowed us to uncover
                   behavioral patterns that traditional SEO tools couldn't fully
                   capture."
                 </p>
@@ -157,7 +157,7 @@ export default function ContactPage() {
               <div>
                 <Input
                   type="text"
-                  placeholder="How did you hear about Rogues?"
+                  placeholder="How did you hear about tacmind ?"
                   value={formData.referralSource}
                   onChange={(e) =>
                     setFormData({

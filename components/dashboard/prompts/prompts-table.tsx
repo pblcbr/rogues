@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@/components/ui/tooltip";
 import { EditPromptDialog } from "./edit-prompt-dialog";
 import { DeletePromptDialog } from "./delete-prompt-dialog";
 import {
@@ -10,8 +11,8 @@ import {
   Pause,
   Edit,
   Trash2,
-  MoreVertical,
   TrendingUp,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +21,9 @@ interface Prompt {
   prompt_text: string;
   category?: string;
   is_active: boolean;
+  is_pinned?: boolean;
   created_at: string;
+  topics?: { name: string };
 }
 
 interface PromptsTableProps {
@@ -32,7 +35,19 @@ interface PromptsTableProps {
  * Displays and manages monitoring prompts
  */
 export function PromptsTable({ prompts }: PromptsTableProps) {
-  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
+  const [localPrompts, setLocalPrompts] = useState(prompts);
+
+  const toggleActive = async (p: Prompt) => {
+    const next = !p.is_active;
+    setLocalPrompts((prev) =>
+      prev.map((x) => (x.id === p.id ? { ...x, is_active: next } : x))
+    );
+    await fetch("/api/prompts/toggle-active", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ promptId: p.id, isActive: next }),
+    });
+  };
 
   if (prompts.length === 0) {
     return (
@@ -65,16 +80,18 @@ export function PromptsTable({ prompts }: PromptsTableProps) {
                 Prompt
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Category
+                Topic
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Created
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Performance
+                <div className="flex items-center gap-1.5">
+                  Average Position
+                  <Tooltip
+                    content="The average position your brand is mentioned in AI-generated answers. For example, if your brand is usually listed first, your average position will be close to 1. A lower average position means your brand is more likely to be mentioned at the top."
+                    side="top"
+                  >
+                    <HelpCircle className="h-3.5 w-3.5 cursor-help text-gray-400 hover:text-gray-600" />
+                  </Tooltip>
+                </div>
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                 Actions
@@ -82,40 +99,34 @@ export function PromptsTable({ prompts }: PromptsTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {prompts.map((prompt) => (
-              <tr key={prompt.id} className="hover:bg-gray-50">
+            {localPrompts.map((prompt) => (
+              <tr
+                key={prompt.id}
+                className={cn(
+                  "hover:bg-gray-50",
+                  !prompt.is_active && "opacity-60"
+                )}
+              >
                 <td className="px-6 py-4">
-                  <p className="max-w-md text-sm font-medium text-gray-900">
+                  <p
+                    className={cn(
+                      "max-w-md text-sm font-medium",
+                      prompt.is_active ? "text-gray-900" : "text-gray-500"
+                    )}
+                  >
                     {prompt.prompt_text}
                   </p>
                 </td>
                 <td className="px-6 py-4">
-                  {prompt.category && (
-                    <Badge variant="secondary">{prompt.category}</Badge>
+                  {prompt.topics?.name ? (
+                    <Badge variant="outline">{prompt.topics.name}</Badge>
+                  ) : (
+                    <span className="text-sm text-gray-400">—</span>
                   )}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className={cn(
-                        "h-2 w-2 rounded-full",
-                        prompt.is_active ? "bg-green-500" : "bg-gray-400"
-                      )}
-                    />
-                    <span className="text-sm text-gray-600">
-                      {prompt.is_active ? "Active" : "Paused"}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(prompt.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4">
                   <div className="text-sm">
-                    <span className="font-medium text-gray-900">
-                      {Math.floor(Math.random() * 50 + 10)}
-                    </span>
-                    <span className="text-gray-500"> mentions</span>
+                    <span className="font-medium text-gray-900">-</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
@@ -124,6 +135,7 @@ export function PromptsTable({ prompts }: PromptsTableProps) {
                       variant="ghost"
                       size="sm"
                       title={prompt.is_active ? "Pause" : "Activate"}
+                      onClick={() => toggleActive(prompt)}
                     >
                       {prompt.is_active ? (
                         <Pause className="h-4 w-4" />

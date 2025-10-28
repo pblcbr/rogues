@@ -1,8 +1,8 @@
-import { LoginForm } from "@/components/auth/login-form";
+import { LoginForm } from "../../../components/auth/login-form";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Login | Rogues",
+  title: "Login | tacmind",
   description: "Sign in to your Answer Engine Optimization platform",
 };
 

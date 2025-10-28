@@ -1,5 +1,7 @@
 import { LucideIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HelpCircle } from "lucide-react";
+import { Tooltip } from "@/components/ui/tooltip";
 
 interface MetricCardProps {
   title: string;
@@ -8,6 +10,7 @@ interface MetricCardProps {
   icon: LucideIcon;
   description: string;
   trend: "up" | "down";
+  tooltip?: string;
 }
 
 /**
@@ -21,6 +24,7 @@ export function MetricCard({
   icon: Icon,
   description,
   trend,
+  tooltip,
 }: MetricCardProps) {
   const isPositive = change >= 0;
 
@@ -32,7 +36,14 @@ export function MetricCard({
           <div className="rounded-lg bg-blue-50 p-2">
             <Icon className="h-5 w-5 text-blue-600" />
           </div>
-          <span className="text-sm font-medium text-gray-600">{title}</span>
+          <div className="flex items-center space-x-1">
+            <span className="text-sm font-medium text-gray-600">{title}</span>
+            {tooltip && (
+              <Tooltip content={tooltip} side="top">
+                <HelpCircle className="h-4 w-4 cursor-help text-gray-400 hover:text-gray-600" />
+              </Tooltip>
+            )}
+          </div>
         </div>
       </div>
 

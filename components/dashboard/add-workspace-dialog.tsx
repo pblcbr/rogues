@@ -8,6 +8,14 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,11 +25,17 @@ interface AddWorkspaceDialogProps {
 }
 
 const workspaceSchema = z.object({
-  companyName: z.string().min(2, "Company name must be at least 2 characters"),
-  companyDomain: z.string().min(2, "Domain is required").optional(),
+  brand_name: z.string().min(2, "Brand name must be at least 2 characters"),
+  brand_website: z.string().min(2, "Brand website is required"),
+  brand_description: z.string().optional(),
 });
 
 type WorkspaceFormData = z.infer<typeof workspaceSchema>;
+
+const PLAN_OPTIONS = [
+  { value: "starter", name: "Starter", price: "$99/mo", prompts: "50 prompts" },
+  { value: "growth", name: "Growth", price: "$399/mo", prompts: "100 prompts" },
+];
 
 /**
  * Add Workspace Dialog
@@ -36,6 +50,9 @@ export function AddWorkspaceDialog({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [region, setRegion] = useState("");
+  const [language, setLanguage] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState("starter");
 
   const {
     register,
@@ -50,46 +67,43 @@ export function AddWorkspaceDialog({
     setIsLoading(true);
     setErrorMessage("");
 
+    // Validate region, language, and plan
+    if (!region) {
+      setErrorMessage("Please select a region");
+      setIsLoading(false);
+      return;
+    }
+    if (!language) {
+      setErrorMessage("Please select a language");
+      setIsLoading(false);
+      return;
+    }
+    if (!selectedPlan) {
+      setErrorMessage("Please select a plan");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      // Call the new API endpoint
+      const response = await fetch("/api/workspace/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brand_name: data.brand_name,
+          brand_website: data.brand_website,
+          brand_description: data.brand_description || "",
+          region: region,
+          language: language,
+          plan: selectedPlan,
+        }),
+      });
 
-      // Create workspace
-      const { data: workspace, error: workspaceError } = await supabase
-        .from("workspaces")
-        .insert({
-          company_name: data.companyName,
-          company_domain: data.companyDomain || data.companyName.toLowerCase(),
-          owner_id: user.id,
-          plan_id: "starter", // Default plan for new workspaces
-        })
-        .select()
-        .single();
+      const result = await response.json();
 
-      if (workspaceError) throw workspaceError;
-
-      // Add user as owner (trigger will do this automatically, but we ensure it)
-      const { error: memberError } = await supabase
-        .from("workspace_members")
-        .insert({
-          workspace_id: workspace.id,
-          user_id: user.id,
-          role: "owner",
-        });
-
-      if (memberError && !memberError.message.includes("duplicate")) {
-        throw memberError;
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to create workspace");
       }
-
-      // Set as current workspace
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ current_workspace_id: workspace.id })
-        .eq("id", user.id);
-
-      if (profileError) throw profileError;
 
       // Success
       setIsOpen(false);
@@ -109,6 +123,9 @@ export function AddWorkspaceDialog({
   const handleClose = () => {
     setIsOpen(false);
     setErrorMessage("");
+    setRegion("");
+    setLanguage("");
+    setSelectedPlan("starter");
     reset();
   };
 
@@ -148,38 +165,152 @@ export function AddWorkspaceDialog({
               </div>
             )}
 
-            {/* Company Name */}
+            {/* Brand Name */}
             <div className="space-y-2">
-              <Label htmlFor="companyName">Company Name *</Label>
+              <Label htmlFor="brand_name">Brand Name *</Label>
               <Input
-                id="companyName"
+                id="brand_name"
                 placeholder="e.g., Acme Corp"
-                {...register("companyName")}
-                className={errors.companyName ? "border-destructive" : ""}
+                {...register("brand_name")}
+                className={errors.brand_name ? "border-destructive" : ""}
                 disabled={isLoading}
               />
-              {errors.companyName && (
+              {errors.brand_name && (
                 <p className="text-sm text-destructive">
-                  {errors.companyName.message}
+                  {errors.brand_name.message}
                 </p>
               )}
             </div>
 
-            {/* Company Domain */}
+            {/* Brand Website */}
             <div className="space-y-2">
-              <Label htmlFor="companyDomain">Domain (optional)</Label>
+              <Label htmlFor="brand_website">Brand Website *</Label>
               <Input
-                id="companyDomain"
+                id="brand_website"
                 placeholder="e.g., acmecorp.com"
-                {...register("companyDomain")}
-                className={errors.companyDomain ? "border-destructive" : ""}
+                {...register("brand_website")}
+                className={errors.brand_website ? "border-destructive" : ""}
                 disabled={isLoading}
               />
-              {errors.companyDomain && (
+              {errors.brand_website && (
                 <p className="text-sm text-destructive">
-                  {errors.companyDomain.message}
+                  {errors.brand_website.message}
                 </p>
               )}
+            </div>
+
+            {/* Brand Description */}
+            <div className="space-y-2">
+              <Label htmlFor="brand_description">Brand Description</Label>
+              <Textarea
+                id="brand_description"
+                placeholder="Describe what your brand does (e.g., SaaS for project management)"
+                {...register("brand_description")}
+                className={errors.brand_description ? "border-destructive" : ""}
+                disabled={isLoading}
+                rows={3}
+              />
+              {errors.brand_description && (
+                <p className="text-sm text-destructive">
+                  {errors.brand_description.message}
+                </p>
+              )}
+            </div>
+
+            {/* Plan Selection */}
+            <div className="space-y-2">
+              <Label>Plan *</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {PLAN_OPTIONS.map((plan) => (
+                  <button
+                    key={plan.value}
+                    type="button"
+                    onClick={() => setSelectedPlan(plan.value)}
+                    disabled={isLoading}
+                    className={`rounded-lg border-2 p-3 text-left transition-colors ${
+                      selectedPlan === plan.value
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="font-semibold text-gray-900">
+                      {plan.name}
+                    </div>
+                    <div className="mt-1 text-sm text-gray-600">
+                      {plan.price}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {plan.prompts}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Region */}
+            <div className="space-y-2">
+              <Label>Region *</Label>
+              <Select
+                value={region}
+                onValueChange={setRegion}
+                disabled={isLoading}
+              >
+                <SelectTrigger
+                  className={errors.region ? "border-destructive" : ""}
+                >
+                  <SelectValue placeholder="Select region" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="United States">
+                    🇺🇸 United States
+                  </SelectItem>
+                  <SelectItem value="United Kingdom">
+                    🇬🇧 United Kingdom
+                  </SelectItem>
+                  <SelectItem value="Spain">🇪🇸 Spain</SelectItem>
+                  <SelectItem value="France">🇫🇷 France</SelectItem>
+                  <SelectItem value="Germany">🇩🇪 Germany</SelectItem>
+                  <SelectItem value="Italy">🇮🇹 Italy</SelectItem>
+                  <SelectItem value="Portugal">🇵🇹 Portugal</SelectItem>
+                  <SelectItem value="Netherlands">🇳🇱 Netherlands</SelectItem>
+                  <SelectItem value="Canada">🇨🇦 Canada</SelectItem>
+                  <SelectItem value="Mexico">🇲🇽 Mexico</SelectItem>
+                  <SelectItem value="Brazil">🇧🇷 Brazil</SelectItem>
+                  <SelectItem value="Argentina">🇦🇷 Argentina</SelectItem>
+                  <SelectItem value="Australia">🇦🇺 Australia</SelectItem>
+                  <SelectItem value="India">🇮🇳 India</SelectItem>
+                  <SelectItem value="Singapore">🇸🇬 Singapore</SelectItem>
+                  <SelectItem value="Japan">🇯🇵 Japan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Language */}
+            <div className="space-y-2">
+              <Label>Language *</Label>
+              <Select
+                value={language}
+                onValueChange={setLanguage}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="English (en)">English (en)</SelectItem>
+                  <SelectItem value="Spanish (es)">Spanish (es)</SelectItem>
+                  <SelectItem value="French (fr)">French (fr)</SelectItem>
+                  <SelectItem value="German (de)">German (de)</SelectItem>
+                  <SelectItem value="Italian (it)">Italian (it)</SelectItem>
+                  <SelectItem value="Portuguese (pt)">
+                    Portuguese (pt)
+                  </SelectItem>
+                  <SelectItem value="Dutch (nl)">Dutch (nl)</SelectItem>
+                  <SelectItem value="Japanese (ja)">Japanese (ja)</SelectItem>
+                  <SelectItem value="Chinese (zh)">Chinese (zh)</SelectItem>
+                  <SelectItem value="Korean (ko)">Korean (ko)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Actions */}

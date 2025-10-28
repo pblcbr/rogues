@@ -11,7 +11,19 @@ import { getPlanById } from "@/lib/stripe/plans";
  * Stripe checkout integration
  */
 export function StepPayment() {
-  const { selectedPlan, email, nextStep } = useRegistrationStore();
+  const {
+    selectedPlan,
+    email,
+    nextStep,
+    brandWebsite,
+    brandDescription,
+    region,
+    language,
+    visibilityAnalysis,
+    generatedTopics,
+    selectedTopics,
+    customTopics,
+  } = useRegistrationStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const plan = getPlanById(selectedPlan || "growth");
@@ -34,6 +46,22 @@ export function StepPayment() {
       if (result.error) {
         throw new Error(result.error);
       }
+
+      // Save ALL registration data to sessionStorage for workspace creation after Stripe redirect
+      sessionStorage.setItem("selected_plan", selectedPlan || "growth");
+      sessionStorage.setItem(
+        "registration_data",
+        JSON.stringify({
+          brandWebsite,
+          brandDescription,
+          region,
+          language,
+          visibilityAnalysis,
+          generatedTopics,
+          selectedTopics,
+          customTopics,
+        })
+      );
 
       // Redirect to Stripe Checkout
       if (result.url) {

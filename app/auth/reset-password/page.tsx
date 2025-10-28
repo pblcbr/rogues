@@ -5,7 +5,7 @@ import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Reset Password | Rogues",
+  title: "Reset Password | tacmind",
   description: "Reset your account password",
 };
 

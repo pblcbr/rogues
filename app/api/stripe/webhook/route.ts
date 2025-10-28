@@ -128,30 +128,134 @@ export async function POST(request: NextRequest) {
 
         console.log("[STRIPE WEBHOOK] ✓ Workspace created:", workspace.id);
 
-        // Update profile with workspace_id
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({
-            workspace_id: workspace.id,
-            onboarding_completed: true,
-          })
-          .eq("id", userId);
+        // Ensure user is added to workspace_members
+        // Try to insert, but don't fail if it already exists or RLS blocks it
+        try {
+          const { error: memberError } = await supabase
+            .from("workspace_members")
+            .insert({
+              workspace_id: workspace.id,
+              user_id: userId,
+              role: "owner",
+            });
 
-        if (updateError) {
+          if (memberError) {
+            // Check if this is because the table doesn't exist
+            if (
+              memberError.message.includes("does not exist") ||
+              memberError.message.includes("relation")
+            ) {
+              console.error(
+                "[STRIPE WEBHOOK] ❌ CRITICAL: workspace_members table does not exist. Please run MANUAL_MIGRATION_workspace_members.sql"
+              );
+              console.error("[STRIPE WEBHOOK] Full error:", memberError);
+            } else if (
+              memberError.message.includes("duplicate") ||
+              memberError.message.includes("UNIQUE")
+            ) {
+              console.log("[STRIPE WEBHOOK] User already in workspace_members");
+            } else {
+              console.error(
+                "[STRIPE WEBHOOK] ⚠️ Failed to add user to workspace:",
+                memberError
+              );
+              // Don't throw, continue with profile update
+            }
+          } else {
+            console.log("[STRIPE WEBHOOK] ✓ User added to workspace");
+          }
+        } catch (err) {
           console.error(
-            "[STRIPE WEBHOOK] ⚠️ Failed to update profile:",
-            updateError
+            "[STRIPE WEBHOOK] ⚠️ Error inserting into workspace_members:",
+            err
           );
-          // Don't fail the webhook, workspace is created
-        } else {
-          console.log("[STRIPE WEBHOOK] ✓ Profile updated with workspace_id");
+          // Continue anyway - the workspace is created
+        }
+
+        // Update profile with workspace_id and current_workspace_id (if columns exist)
+        // Try to update current_workspace_id first (added in migration 003)
+        try {
+          const { error: currentWsError } = await supabase
+            .from("profiles")
+            .update({
+              current_workspace_id: workspace.id,
+            })
+            .eq("id", userId);
+
+          if (currentWsError) {
+            console.log(
+              "[STRIPE WEBHOOK] current_workspace_id column may not exist yet"
+            );
+          } else {
+            console.log(
+              "[STRIPE WEBHOOK] ✓ Profile current_workspace_id updated"
+            );
+          }
+        } catch (err) {
+          console.log(
+            "[STRIPE WEBHOOK] ⚠️ Could not update current_workspace_id:",
+            err
+          );
+        }
+
+        // Try to update workspace_id (added in migration 002)
+        try {
+          const { error: wsIdError } = await supabase
+            .from("profiles")
+            .update({
+              workspace_id: workspace.id,
+            })
+            .eq("id", userId);
+
+          if (wsIdError) {
+            console.log(
+              "[STRIPE WEBHOOK] workspace_id column may not exist yet"
+            );
+          } else {
+            console.log("[STRIPE WEBHOOK] ✓ Profile workspace_id updated");
+          }
+        } catch (err) {
+          console.log(
+            "[STRIPE WEBHOOK] ⚠️ Could not update workspace_id:",
+            err
+          );
+        }
+
+        // Try to update onboarding_completed (always exists in schema)
+        try {
+          const { error: onboardingError } = await supabase
+            .from("profiles")
+            .update({
+              onboarding_completed: true,
+            })
+            .eq("id", userId);
+
+          if (onboardingError) {
+            console.error(
+              "[STRIPE WEBHOOK] ⚠️ Failed to update onboarding_completed:",
+              onboardingError
+            );
+          } else {
+            console.log(
+              "[STRIPE WEBHOOK] ✓ Profile onboarding_completed updated"
+            );
+          }
+        } catch (err) {
+          console.error(
+            "[STRIPE WEBHOOK] ⚠️ Error updating onboarding_completed:",
+            err
+          );
         }
 
         // Generate initial prompts from selected topics (if any exist)
         try {
+          // Determine plan cap for prompts
+          const plan = workspace.plan || "growth";
+          const cap = plan === "starter" ? 50 : 100;
+
           const { data: selectedTopics } = await supabase
             .from("topics")
-            .select("name, description, category, keywords")
+            .select("name")
             .eq("workspace_id", workspace.id)
             .eq("is_selected", true);
 
@@ -160,7 +264,41 @@ export async function POST(request: NextRequest) {
               "@/lib/openai/prompt-from-topic"
             );
             const prompts = await generatePromptsForTopics(selectedTopics, 8);
-            const rows = prompts.map((p) => ({
+
+            // Check active prompts and enforce cap (replace mode if full)
+            const { count: activeCount } = await supabase
+              .from("monitoring_prompts")
+              .select("id", { count: "exact", head: true })
+              .eq("workspace_id", workspace.id)
+              .eq("is_active", true);
+            let remaining = Math.max(0, cap - (activeCount || 0));
+
+            if (remaining === 0) {
+              const { data: oldestActives } = await supabase
+                .from("monitoring_prompts")
+                .select("id, created_at, is_pinned")
+                .eq("workspace_id", workspace.id)
+                .eq("is_active", true)
+                .eq("is_pinned", false)
+                .order("created_at", { ascending: true })
+                .limit(prompts.length);
+
+              const idsToDeactivate = (oldestActives || []).map((r) => r.id);
+              if (idsToDeactivate.length > 0) {
+                await supabase
+                  .from("monitoring_prompts")
+                  .update({ is_active: false })
+                  .in("id", idsToDeactivate);
+
+                const { count: activeAfter } = await supabase
+                  .from("monitoring_prompts")
+                  .select("id", { count: "exact", head: true })
+                  .eq("workspace_id", workspace.id)
+                  .eq("is_active", true);
+                remaining = Math.max(0, cap - (activeAfter || 0));
+              }
+            }
+            const rowsAll = prompts.map((p) => ({
               workspace_id: workspace.id,
               prompt_text: p.text,
               topic: p.topic || null,
@@ -168,10 +306,11 @@ export async function POST(request: NextRequest) {
               is_active: true,
               source: "ai_from_topic",
             }));
+            const rows = rowsAll.slice(0, remaining);
             if (rows.length > 0) {
               await supabase.from("monitoring_prompts").insert(rows);
               console.log(
-                `[STRIPE WEBHOOK] ✓ Inserted ${rows.length} prompts from topics`
+                `[STRIPE WEBHOOK] ✓ Inserted ${rows.length} prompts from topics (cap ${cap})`
               );
             }
           } else {

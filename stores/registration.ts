@@ -183,6 +183,7 @@ export const useRegistrationStore = create<RegistrationState>()(
         brandDescription: state.brandDescription,
         region: state.region,
         language: state.language,
+        visibilityAnalysis: state.visibilityAnalysis,
         generatedTopics: state.generatedTopics,
         selectedTopics: state.selectedTopics,
         customTopics: state.customTopics,

@@ -5,6 +5,8 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { WorkspaceSwitcher } from "./workspace-switcher";
+import { RegionSwitcher } from "./region-switcher";
 import {
   LayoutDashboard,
   Target,
@@ -13,17 +15,21 @@ import {
   Users,
   FileText,
   Zap,
+  BookOpen,
 } from "lucide-react";
 
 interface SidebarProps {
   profile: any;
   userEmail?: string;
+  currentWorkspaceId?: string;
 }
 
 const navigation = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Topics", href: "/dashboard/topics", icon: BookOpen },
   { name: "Prompts", href: "/dashboard/prompts", icon: Target },
   { name: "Results", href: "/dashboard/results", icon: TrendingUp },
+  { name: "Citations", href: "/dashboard/citations", icon: FileText },
   { name: "Actions", href: "/dashboard/actions", icon: Zap },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Team", href: "/dashboard/team", icon: Users },
@@ -34,7 +40,11 @@ const navigation = [
  * Dashboard Sidebar Navigation
  * Desktop-first vertical navigation
  */
-export function DashboardSidebar({ profile, userEmail }: SidebarProps) {
+export function DashboardSidebar({
+  profile,
+  userEmail,
+  currentWorkspaceId,
+}: SidebarProps) {
   const pathname = usePathname();
   const supabase = createClient();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -55,23 +65,20 @@ export function DashboardSidebar({ profile, userEmail }: SidebarProps) {
       </div>
 
       {/* Workspace Selector */}
-      <div className="border-b border-gray-200 px-4 py-4">
-        <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-            <span className="text-sm font-semibold text-white">
-              {profile?.workspaces?.company_name?.[0]?.toUpperCase() || "W"}
-            </span>
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-gray-900">
-              {profile?.workspaces?.company_name || "My Workspace"}
-            </p>
-            <p className="truncate text-xs text-gray-500">
-              {profile?.workspaces?.plan_id || "starter"} plan
-            </p>
-          </div>
-        </div>
-      </div>
+      <WorkspaceSwitcher
+        currentWorkspaceId={profile?.current_workspace_id}
+        isAgency={profile?.is_agency || false}
+      />
+
+      {/* Region Selector */}
+      {(profile?.current_workspace_id || profile?.workspace_id) && (
+        <RegionSwitcher
+          currentWorkspaceId={
+            profile.current_workspace_id || profile.workspace_id
+          }
+          currentRegionId={profile?.current_workspace_region_id}
+        />
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">

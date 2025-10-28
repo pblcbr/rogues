@@ -49,7 +49,37 @@ export async function POST(request: NextRequest) {
     console.log("[API] Language:", language);
     console.log("[API] Selected Topics:", selectedTopics?.length || 0);
 
+    // Get default region for this workspace
+    const { data: defaultRegion } = await supabase
+      .from("workspace_regions")
+      .select("id")
+      .eq("workspace_id", workspaceId)
+      .eq("is_default", true)
+      .single();
+
+    if (!defaultRegion) {
+      console.error("[API] No default region found for workspace");
+      return NextResponse.json(
+        { error: "Default region not found" },
+        { status: 500 }
+      );
+    }
+
+    console.log("[API] Default region ID:", defaultRegion.id);
+
     // 1. Update profile with registration data
+    console.log("[API] Attempting to update profile with data:", {
+      userId: user.id,
+      brandWebsite,
+      brandDescription,
+      region,
+      language,
+      hasBrandWebsite: !!brandWebsite,
+      hasBrandDescription: !!brandDescription,
+      hasRegion: !!region,
+      hasLanguage: !!language,
+    });
+
     const { error: profileError } = await supabase
       .from("profiles")
       .update({
@@ -59,19 +89,22 @@ export async function POST(request: NextRequest) {
         language,
         visibility_analysis: visibilityAnalysis,
         workspace_id: workspaceId,
+        current_workspace_region_id: defaultRegion.id,
         onboarding_completed: true,
       })
       .eq("id", user.id);
 
     if (profileError) {
-      console.error("[API] Error updating profile:", profileError);
+      console.error("[API] ❌ Error updating profile:", profileError);
+      console.error("[API] Error code:", profileError.code);
+      console.error("[API] Error message:", profileError.message);
       return NextResponse.json(
-        { error: "Failed to update profile" },
+        { error: "Failed to update profile: " + profileError.message },
         { status: 500 }
       );
     }
 
-    console.log("[API] ✓ Profile updated");
+    console.log("[API] ✓ Profile updated successfully");
 
     // 2. Prepare topics data (merge generated and custom)
     const allTopics = [];
@@ -84,13 +117,8 @@ export async function POST(request: NextRequest) {
       allTopics.push(
         ...selectedGeneratedTopics.map((topic: any) => ({
           workspace_id: workspaceId,
+          workspace_region_id: defaultRegion.id,
           name: topic.name,
-          description: topic.description,
-          category: topic.category,
-          estimated_prompts: topic.estimated_prompts,
-          priority: topic.priority,
-          keywords: topic.keywords,
-          why_it_matters: topic.why_it_matters,
           source: "ai_generated",
           is_selected: true,
         }))
@@ -104,13 +132,8 @@ export async function POST(request: NextRequest) {
           .filter((topicName: string) => selectedTopics?.includes(topicName))
           .map((topicName: string) => ({
             workspace_id: workspaceId,
+            workspace_region_id: defaultRegion.id,
             name: topicName,
-            description: `Custom monitoring topic: ${topicName}`,
-            category: "awareness",
-            estimated_prompts: 10,
-            priority: "medium",
-            keywords: [topicName.toLowerCase()],
-            why_it_matters: "Custom topic added by user",
             source: "custom",
             is_selected: true,
           }))

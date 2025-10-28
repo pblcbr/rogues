@@ -16,12 +16,14 @@ export interface GeneratedPrompt {
  */
 export async function generatePromptsForTopic(
   topic: TopicLike,
-  count: number = 8
+  count: number = 8,
+  language?: string,
+  region?: string
 ): Promise<GeneratedPrompt[]> {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return heuristicPrompts(topic, count);
+      return heuristicPrompts(topic, count, language, region);
     }
 
     const { openai } = await import("./client");
@@ -33,12 +35,15 @@ Topic: ${topic.name}
 Category: ${topic.category || "unknown"}
 Keywords: ${(topic.keywords || []).join(", ")}
 Description: ${topic.description || ""}
+Language: ${language || "English"}
+Region: ${region || "United States"}
 
-Task: Generate EXACTLY ${count} natural-language user prompts a buyer would ask in chat-based AI. 
+Task: Generate EXACTLY ${count} natural-language user prompts a buyer would ask in chat-based AI in ${language || "English"} focused on ${region || "United States"}. 
 Guidelines:
 - 6–14 words each, no punctuation at the end
 - Mix of comparison, solution, recommendation, pricing, integration, credibility
 - High commercial intent when relevant
+- Use ${language || "English"} language and consider ${region || "United States"} market context
 Return ONLY JSON: { "prompts": ["..."] }
 `;
 
@@ -59,31 +64,44 @@ Return ONLY JSON: { "prompts": ["..."] }
       ? parsed.prompts
       : [];
 
-    if (prompts.length === 0) return heuristicPrompts(topic, count);
+    if (prompts.length === 0)
+      return heuristicPrompts(topic, count, language, region);
 
     return prompts.slice(0, count).map((text) => ({
       text,
       topic: topic.name,
-      category: topic.category,
+      category: topic.category || undefined,
     }));
   } catch {
-    return heuristicPrompts(topic, count);
+    return heuristicPrompts(topic, count, language, region);
   }
 }
 
 export async function generatePromptsForTopics(
   topics: TopicLike[],
-  countPerTopic: number = 8
+  countPerTopic: number = 8,
+  language?: string,
+  region?: string
 ): Promise<GeneratedPrompt[]> {
   const results: GeneratedPrompt[] = [];
   for (const t of topics) {
-    const ps = await generatePromptsForTopic(t, countPerTopic);
+    const ps = await generatePromptsForTopic(
+      t,
+      countPerTopic,
+      language,
+      region
+    );
     results.push(...ps);
   }
   return results;
 }
 
-function heuristicPrompts(topic: TopicLike, count: number): GeneratedPrompt[] {
+function heuristicPrompts(
+  topic: TopicLike,
+  count: number,
+  language?: string,
+  region?: string
+): GeneratedPrompt[] {
   const base = topic.name.toLowerCase();
   const k = (topic.keywords || []).slice(0, 2).join(" ");
   const seeds = [
@@ -101,6 +119,6 @@ function heuristicPrompts(topic: TopicLike, count: number): GeneratedPrompt[] {
   return seeds.slice(0, count).map((text) => ({
     text,
     topic: topic.name,
-    category: topic.category,
+    category: topic.category || undefined,
   }));
 }

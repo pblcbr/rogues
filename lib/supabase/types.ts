@@ -59,6 +59,35 @@ export interface Database {
           updated_at?: string;
         };
       };
+      workspace_regions: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          region: string;
+          language: string;
+          is_default: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id: string;
+          region: string;
+          language: string;
+          is_default?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          region?: string;
+          language?: string;
+          is_default?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       workspaces: {
         Row: {
           id: string;
