@@ -1,6 +1,6 @@
 # OpenAI API Configuration Guide
 
-This guide explains how to configure OpenAI API for AI-powered prompt generation in the Rogues platform.
+This guide explains how to configure OpenAI API for AI-powered prompt generation in the tacmind platform.
 
 ## Why OpenAI?
 
@@ -30,7 +30,7 @@ The registration wizard uses OpenAI's GPT-4o model to analyze a company's domain
 
 1. Go to [API Keys](https://platform.openai.com/api-keys)
 2. Click **"Create new secret key"**
-3. Give it a name (e.g., "Rogues Development")
+3. Give it a name (e.g., "tacmind Development")
 4. Copy the key immediately (it will only be shown once)
 5. Save it securely
 

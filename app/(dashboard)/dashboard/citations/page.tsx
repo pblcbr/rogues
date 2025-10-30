@@ -60,7 +60,7 @@ export default async function CitationsPage({
       .from("results")
       .select("id")
       .in("snapshot_id", snapIds);
-    const rids = (resIds || []).map((r: any) => r.id);
+    const rids = (resIds || []).map((r) => r.id);
     if (rids.length > 0) {
       const { data: cits } = await supabase
         .from("citations")
@@ -70,7 +70,7 @@ export default async function CitationsPage({
         string,
         { count: number; authSum: number; authN: number }
       > = {};
-      (cits || []).forEach((c: any) => {
+      (cits || []).forEach((c) => {
         const k = c.domain || "";
         if (!k) return;
         if (!map[k]) map[k] = { count: 0, authSum: 0, authN: 0 };
@@ -114,7 +114,7 @@ export default async function CitationsPage({
             className="mt-1 rounded-md border border-gray-300 p-2 text-sm"
           >
             <option value="">All</option>
-            {(models || []).map((m: any) => (
+            {(models || []).map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
               </option>

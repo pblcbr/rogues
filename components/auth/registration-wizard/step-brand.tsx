@@ -49,8 +49,8 @@ export function StepBrand() {
           Start tracking your brand
         </h1>
         <p className="text-muted-foreground">
-          This will be the first brand you'll track on Rogues — you can add more
-          later.
+          This will be the first brand you'll track on tacmind — you can add
+          more later.
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export function StepBrand() {
         <div className="space-y-2">
           <Label htmlFor="description">
             Tell us about your brand{" "}
-            <span className="text-muted-foreground">(optional)</span>
+            <span className="text-muted-foreground">(recommended)</span>
           </Label>
           <textarea
             id="description"
@@ -89,7 +89,7 @@ export function StepBrand() {
             className="flex w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           />
           <p className="text-xs text-muted-foreground">
-            The more specific you are, the better the results we'll be able to
+            The more specific you are, the better the insights we'll be able to
             provide.
           </p>
           <ul className="ml-4 space-y-1 text-xs text-muted-foreground">

@@ -75,7 +75,7 @@ export function LoginForm() {
       {/* Logo */}
       <div>
         <Link href="/" className="inline-block">
-          <h1 className="text-3xl font-bold">Rogues</h1>
+          <h1 className="text-3xl font-bold">tacmind</h1>
         </Link>
       </div>
 

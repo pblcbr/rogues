@@ -1,16 +1,29 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { ResultsFilters } from "@/components/dashboard/results/results-filters";
-import { ResultsGrid } from "@/components/dashboard/results/results-grid";
-import { TrendingUp, Target, Award, BarChart3 } from "lucide-react";
-import { RunMeasurement } from "@/components/dashboard/results/run-measurement";
+import { ResultsList } from "@/components/dashboard/results/results-list";
+import { ResultsAnalytics } from "@/components/dashboard/results/results-analytics";
 import type { Database } from "@/lib/supabase/types";
 
+interface ResultsPageProps {
+  searchParams: {
+    search?: string;
+    date_from?: string;
+    date_to?: string;
+    brand_filter?: string;
+    llm_providers?: string;
+    relevancy_min?: string;
+    relevancy_max?: string;
+    sort_by?: string;
+    sort_order?: string;
+    page?: string;
+  };
+}
+
 /**
- * Results Analysis Page
- * View and analyze LLM responses, brand mentions, and citations
+ * Results Page - Central hub for viewing and analyzing all LLM responses
  */
-export default async function ResultsPage() {
+export default async function ResultsPage({ searchParams }: ResultsPageProps) {
   const supabase = createServerComponentClient<Database>({ cookies });
 
   const {
@@ -21,7 +34,7 @@ export default async function ResultsPage() {
     return null;
   }
 
-  // Fetch workspace and current region
+  // Get current workspace and region
   const { data: profile } = await supabase
     .from("profiles")
     .select("current_workspace_id, current_workspace_region_id")
@@ -31,360 +44,269 @@ export default async function ResultsPage() {
   const currentWorkspaceId = profile?.current_workspace_id;
   const currentRegionId = profile?.current_workspace_region_id;
 
-  // Fetch latest snapshots aggregates (simple MVP) - filter by region if selected
-  let snapsQuery = supabase
-    .from("snapshots")
-    .select("id, model_id, captured_at")
-    .eq("workspace_id", currentWorkspaceId || "");
+  if (!currentWorkspaceId) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <p className="text-gray-500">No workspace selected</p>
+      </div>
+    );
+  }
 
+  // Get workspace brand name
+  const { data: workspace } = await supabase
+    .from("workspaces")
+    .select("brand_name")
+    .eq("id", currentWorkspaceId)
+    .single();
+
+  const brandName = workspace?.brand_name || "Your Brand";
+
+  // Parse filters from search params
+  const page = parseInt(searchParams.page || "1");
+  const limit = 20;
+  const offset = (page - 1) * limit;
+
+  const searchTerm = searchParams.search || "";
+  const dateFrom = searchParams.date_from || "";
+  const dateTo = searchParams.date_to || "";
+  const brandFilter = searchParams.brand_filter || "all";
+  const llmProviders = searchParams.llm_providers
+    ? searchParams.llm_providers.split(",")
+    : [];
+  const relevancyMin = searchParams.relevancy_min
+    ? parseInt(searchParams.relevancy_min)
+    : 0;
+  const relevancyMax = searchParams.relevancy_max
+    ? parseInt(searchParams.relevancy_max)
+    : 100;
+  const sortBy = searchParams.sort_by || "date";
+  const sortOrder = searchParams.sort_order || "desc";
+
+  // Build query for results
+  let resultsQuery = supabase
+    .from("results")
+    .select(
+      `
+      *,
+      monitoring_prompts!inner(
+        id,
+        prompt_text,
+        workspace_id,
+        workspace_region_id,
+        topics(name)
+      )
+    `,
+      { count: "exact" }
+    )
+    .eq("monitoring_prompts.workspace_id", currentWorkspaceId);
+
+  // Filter by region if selected
   if (currentRegionId) {
-    snapsQuery = snapsQuery.eq("workspace_region_id", currentRegionId);
+    resultsQuery = resultsQuery.eq(
+      "monitoring_prompts.workspace_region_id",
+      currentRegionId
+    );
   }
 
-  const { data: snaps } = await snapsQuery
-    .order("captured_at", { ascending: false })
-    .limit(10);
+  // Apply search filter
+  if (searchTerm) {
+    resultsQuery = resultsQuery.ilike("response_text", `%${searchTerm}%`);
+  }
 
-  // Aggregate results across latest snapshots
-  let totalResults = 0;
-  let mentionSum = 0;
-  let sentimentSum = 0;
-  let promSum = 0;
-  let countForAvg = 0;
-  if (snaps && snaps.length > 0) {
-    const snapIds = snaps.map((s) => s.id);
-    const { data: res } = await supabase
-      .from("results")
-      .select("mention_present, sentiment, prominence")
-      .in("snapshot_id", snapIds);
-    const list = res || [];
-    totalResults = list.length;
-    for (const r of list) {
-      if (r.mention_present) mentionSum += 1;
-      if (typeof r.sentiment === "number") {
-        sentimentSum += r.sentiment;
-        countForAvg++;
+  // Apply date range filter
+  if (dateFrom) {
+    resultsQuery = resultsQuery.gte("created_at", dateFrom);
+  }
+  if (dateTo) {
+    resultsQuery = resultsQuery.lte("created_at", dateTo);
+  }
+
+  // Apply brand filter
+  if (brandFilter === "mentioned") {
+    resultsQuery = resultsQuery.eq("our_brand_mentioned", true);
+  } else if (brandFilter === "not_mentioned") {
+    resultsQuery = resultsQuery.eq("our_brand_mentioned", false);
+  }
+
+  // Apply LLM provider filter
+  if (llmProviders.length > 0) {
+    resultsQuery = resultsQuery.in("llm_provider", llmProviders);
+  }
+
+  // Apply relevancy filter
+  resultsQuery = resultsQuery
+    .gte("relevancy_score", relevancyMin)
+    .lte("relevancy_score", relevancyMax);
+
+  // Apply sorting
+  const sortColumn =
+    sortBy === "relevancy"
+      ? "relevancy_score"
+      : sortBy === "position"
+        ? "our_brand_position"
+        : "created_at";
+
+  resultsQuery = resultsQuery.order(sortColumn, {
+    ascending: sortOrder === "asc",
+    nullsFirst: false,
+  });
+
+  // Apply pagination
+  resultsQuery = resultsQuery.range(offset, offset + limit - 1);
+
+  const { data: results, count, error } = await resultsQuery;
+
+  if (error) {
+    console.error("Error fetching results:", error);
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Results</h1>
+          <p className="mt-2 text-gray-600">
+            View and analyze all LLM responses across your monitoring prompts
+          </p>
+        </div>
+        <div className="flex h-96 flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50">
+          <div className="mb-4 rounded-full bg-red-100 p-4">
+            <svg
+              className="h-12 w-12 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">
+            Error Loading Results
+          </h3>
+          <p className="mb-4 text-sm text-gray-600">
+            {error.message || "An error occurred while loading results"}
+          </p>
+          <p className="text-xs text-gray-500">
+            Please contact support if this error persists
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fetch citations for all results
+  const resultIds = results?.map((r) => r.id) || [];
+  let citations: any[] = [];
+
+  if (resultIds.length > 0) {
+    const { data: citationsData } = await supabase
+      .from("citations")
+      .select("result_id, url, title, domain, favicon_url, position")
+      .in("result_id", resultIds)
+      .order("position", { ascending: true });
+
+    citations = citationsData || [];
+  }
+
+  // Group citations by result_id
+  const citationsByResult = citations.reduce(
+    (acc, citation) => {
+      if (!acc[citation.result_id]) {
+        acc[citation.result_id] = [];
       }
-      if (typeof r.prominence === "number") promSum += r.prominence;
-    }
-  }
-  const avgMentionRate =
-    totalResults > 0 ? Math.round((mentionSum / totalResults) * 100) : 0;
-  const avgSentiment =
-    countForAvg > 0 ? (sentimentSum / countForAvg).toFixed(2) : "0";
-  const avgProminence =
-    totalResults > 0 ? (promSum / totalResults).toFixed(2) : "0";
+      acc[citation.result_id].push(citation);
+      return acc;
+    },
+    {} as Record<string, any[]>
+  );
 
-  // Build per-snapshot aggregates for a basic list
-  let snapshotRows: {
-    id: string;
-    model: string;
-    captured_at: string;
-    total: number;
-    mentionRate: string;
-  }[] = [];
-  if (snaps && snaps.length > 0) {
-    const snapIds = snaps.map((s) => s.id);
-    const { data: res2 } = await supabase
-      .from("results")
-      .select("snapshot_id, mention_present")
-      .in("snapshot_id", snapIds);
-    const grouped: Record<string, { total: number; mentions: number }> = {};
-    (res2 || []).forEach((r: any) => {
-      const g = grouped[r.snapshot_id] || { total: 0, mentions: 0 };
-      g.total += 1;
-      if (r.mention_present) g.mentions += 1;
-      grouped[r.snapshot_id] = g;
-    });
-    snapshotRows = snaps.map((s) => {
-      const g = grouped[s.id] || { total: 0, mentions: 0 };
-      const mr =
-        g.total > 0 ? `${Math.round((g.mentions / g.total) * 100)}%` : "-";
-      return {
-        id: s.id,
-        model: s.model_id,
-        captured_at: new Date(s.captured_at as any).toLocaleString(),
-        total: g.total,
-        mentionRate: mr,
-      };
-    });
-  }
+  // Enrich results with citations and prompt data
+  const enrichedResults =
+    results?.map((result) => ({
+      id: result.id,
+      response_text: result.response_text,
+      brands_mentioned: result.brands_mentioned,
+      brand_positions: result.brand_positions,
+      our_brand_mentioned: result.our_brand_mentioned,
+      our_brand_position: result.our_brand_position,
+      relevancy_score: result.relevancy_score,
+      created_at: result.created_at,
+      llm_provider: result.llm_provider,
+      llm_model: result.llm_model,
+      prompt: {
+        id: result.monitoring_prompts?.id,
+        text: result.monitoring_prompts?.prompt_text,
+        topic: result.monitoring_prompts?.topics?.name,
+      },
+      citations: citationsByResult[result.id] || [],
+    })) || [];
+
+  const totalPages = count ? Math.ceil(count / limit) : 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Results & Analysis</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Results</h1>
         <p className="mt-2 text-gray-600">
-          Analyze how AI engines respond to your monitoring prompts
+          View and analyze all LLM responses across your monitoring prompts
         </p>
       </div>
 
-      {/* Controls + Stats Grid */}
+      {/* Analytics Summary */}
+      <ResultsAnalytics
+        workspaceId={currentWorkspaceId}
+        regionId={currentRegionId}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+      />
+
+      {/* Filters & Search */}
+      <ResultsFilters
+        currentFilters={{
+          search: searchTerm,
+          dateFrom,
+          dateTo,
+          brandFilter,
+          llmProviders,
+          relevancyMin,
+          relevancyMax,
+          sortBy,
+          sortOrder,
+        }}
+      />
+
+      {/* Results Count */}
       <div className="flex items-center justify-between">
-        <RunMeasurement workspaceId={currentWorkspaceId || ""} />
-        <p className="text-sm text-gray-500">Cadence: daily (auto-scheduled)</p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="flex items-center space-x-2">
-            <BarChart3 className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-medium text-gray-600">
-              Total Results
+        <p className="text-sm text-gray-600">
+          {count !== null && count !== undefined ? (
+            <>
+              Showing {offset + 1} - {Math.min(offset + limit, count)} of{" "}
+              {count} results
+            </>
+          ) : (
+            "Loading results..."
+          )}
+        </p>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">
+              Page {page} of {totalPages}
             </span>
           </div>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {totalResults.toLocaleString()}
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="flex items-center space-x-2">
-            <Target className="h-5 w-5 text-green-600" />
-            <span className="text-sm font-medium text-gray-600">
-              Mention Rate
-            </span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {avgMentionRate}%
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="flex items-center space-x-2">
-            <Award className="h-5 w-5 text-purple-600" />
-            <span className="text-sm font-medium text-gray-600">
-              Avg. Sentiment
-            </span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {avgSentiment}
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="flex items-center space-x-2">
-            <TrendingUp className="h-5 w-5 text-orange-600" />
-            <span className="text-sm font-medium text-gray-600">
-              Avg. Prominence
-            </span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {avgProminence}
-          </p>
-        </div>
+        )}
       </div>
 
-      {/* Filters */}
-      <ResultsFilters />
-
-      {/* Results Grid */}
-      <ResultsGrid />
-
-      {/* Citations Explorer */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 p-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Citations Explorer
-          </h2>
-          <p className="text-sm text-gray-500">
-            Top cited domains across recent snapshots
-          </p>
-        </div>
-        <div className="p-4">
-          {(async function CitationsTable() {
-            const snapIds = (snaps || []).map((s) => s.id);
-            if (snapIds.length === 0)
-              return <p className="text-sm text-gray-500">No citations yet.</p>;
-            const { data: resIds } = await supabase
-              .from("results")
-              .select("id")
-              .in("snapshot_id", snapIds);
-            const rids = (resIds || []).map((r: any) => r.id);
-            if (rids.length === 0)
-              return <p className="text-sm text-gray-500">No citations yet.</p>;
-            const { data: cits } = await supabase
-              .from("citations")
-              .select("domain, authority_cached")
-              .in("result_id", rids);
-            const map: Record<
-              string,
-              { count: number; authSum: number; authN: number }
-            > = {};
-            (cits || []).forEach((c: any) => {
-              const k = c.domain || "";
-              if (!map[k]) map[k] = { count: 0, authSum: 0, authN: 0 };
-              map[k].count += 1;
-              if (typeof c.authority_cached === "number") {
-                map[k].authSum += c.authority_cached;
-                map[k].authN += 1;
-              }
-            });
-            const rows = Object.entries(map)
-              .map(([domain, v]) => ({
-                domain,
-                count: v.count,
-                authority: v.authN > 0 ? v.authSum / v.authN : 0,
-              }))
-              .sort((a, b) => b.count - a.count)
-              .slice(0, 20);
-            if (rows.length === 0)
-              return <p className="text-sm text-gray-500">No citations yet.</p>;
-            return (
-              <table className="w-full text-sm">
-                <thead className="text-left text-gray-500">
-                  <tr>
-                    <th className="py-2">Domain</th>
-                    <th className="py-2">Mentions</th>
-                    <th className="py-2">Authority</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.domain} className="border-t border-gray-100">
-                      <td className="py-2">{r.domain}</td>
-                      <td className="py-2">{r.count}</td>
-                      <td className="py-2">{r.authority.toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            );
-          })()}
-        </div>
-      </div>
-      {/* Snapshots list */}
-      <div className="rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-200 p-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Recent Snapshots
-          </h2>
-          <p className="text-sm text-gray-500">
-            Last 10 runs across selected models
-          </p>
-        </div>
-        <div className="overflow-x-auto p-4">
-          <table className="w-full text-sm">
-            <thead className="text-left text-gray-500">
-              <tr>
-                <th className="py-2">Captured</th>
-                <th className="py-2">Model</th>
-                <th className="py-2">Total Results</th>
-                <th className="py-2">Mention Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {snapshotRows.map((row) => (
-                <tr key={row.id} className="border-t border-gray-100">
-                  <td className="py-2">{row.captured_at}</td>
-                  <td className="py-2 capitalize">{row.model}</td>
-                  <td className="py-2">{row.total}</td>
-                  <td className="py-2">{row.mentionRate}</td>
-                </tr>
-              ))}
-              {snapshotRows.length === 0 && (
-                <tr>
-                  <td className="py-4 text-gray-500" colSpan={4}>
-                    No snapshots yet. Click "Run measurement" to create your
-                    first run.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* By Model: SoV and TrustScore */}
-      {(() => {
-        // Aggregate by model using latest 20 snapshots
-        async function byModel() {
-          const { data: modelList } = await supabase
-            .from("models")
-            .select("id, name");
-          const snapsByModel: Record<string, string[]> = {};
-          (snaps || []).forEach((s) => {
-            snapsByModel[s.model_id] = snapsByModel[s.model_id] || [];
-            snapsByModel[s.model_id].push(s.id);
-          });
-          const rows: { model: string; sov: number; trust: number }[] = [];
-          for (const mid of Object.keys(snapsByModel)) {
-            const sid = snapsByModel[mid];
-            const { data: res } = await supabase
-              .from("results")
-              .select(
-                "mention_present, sentiment, prominence, competitor_mentions"
-              )
-              .in("snapshot_id", sid);
-            const list = res || [];
-            if (list.length === 0) continue;
-            const mentionCount = list.filter(
-              (r: any) => r.mention_present
-            ).length;
-            const compTouches = list.filter(
-              (r: any) => (r.competitor_mentions || 0) > 0
-            ).length;
-            const denom = mentionCount + compTouches;
-            const sov =
-              denom > 0 ? Math.round((mentionCount / denom) * 100) : 0;
-            const avgProm =
-              list.reduce((s: number, r: any) => s + (r.prominence || 0), 0) /
-              list.length;
-            const sentVals = list
-              .filter((r: any) => typeof r.sentiment === "number")
-              .map((r: any) => r.sentiment);
-            const avgSent =
-              sentVals.length > 0
-                ? sentVals.reduce((s: number, v: number) => s + v, 0) /
-                  sentVals.length
-                : 0;
-            const sentNorm = (avgSent + 1) / 2;
-            const trust = Math.round(
-              100 * (0.5 * 0.5 + 0.3 * sentNorm + 0.2 * avgProm)
-            ); // authority placeholder 0.5
-            const name =
-              (modelList || []).find((m: any) => m.id === mid)?.name || mid;
-            rows.push({ model: name, sov, trust });
-          }
-          return rows;
-        }
-        return (
-          <div className="rounded-lg border border-gray-200 bg-white">
-            <div className="border-b border-gray-200 p-4">
-              <h2 className="text-lg font-semibold text-gray-900">By Model</h2>
-              <p className="text-sm text-gray-500">
-                Share of Voice and Trust by model
-              </p>
-            </div>
-            <div className="p-4">
-              {(async function Table() {
-                const rows = await byModel();
-                if (rows.length === 0)
-                  return <p className="text-sm text-gray-500">No data yet.</p>;
-                return (
-                  <table className="w-full text-sm">
-                    <thead className="text-left text-gray-500">
-                      <tr>
-                        <th className="py-2">Model</th>
-                        <th className="py-2">SoV</th>
-                        <th className="py-2">Trust</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rows.map((r) => (
-                        <tr key={r.model} className="border-t border-gray-100">
-                          <td className="py-2 capitalize">{r.model}</td>
-                          <td className="py-2">{r.sov}%</td>
-                          <td className="py-2">{r.trust}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                );
-              })()}
-            </div>
-          </div>
-        );
-      })()}
+      {/* Results List */}
+      <ResultsList
+        results={enrichedResults}
+        brandName={brandName}
+        currentPage={page}
+        totalPages={totalPages}
+        totalCount={count || 0}
+      />
     </div>
   );
 }

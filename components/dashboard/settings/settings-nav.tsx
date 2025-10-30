@@ -1,23 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Building2, Users } from "lucide-react";
+import { Building2, User } from "lucide-react";
+
+interface SettingsNavProps {
+  currentSection?: string;
+}
 
 const settingsSections = [
-  { name: "Workspace", icon: Building2, param: "workspace" },
-  { name: "Account", icon: Users, param: "account" },
+  {
+    name: "Profile",
+    description: "Account & billing",
+    icon: User,
+    param: "profile",
+  },
+  {
+    name: "Workspaces",
+    description: "Manage all workspaces",
+    icon: Building2,
+    param: "workspaces",
+  },
 ];
 
 /**
  * Settings Navigation Component
- * Vertical navigation for settings sections
+ * Navigate between Profile and Workspaces
  */
-export function SettingsNav() {
-  const searchParams = useSearchParams();
-  const currentSection = searchParams?.get("section") || "workspace";
-
+export function SettingsNav({ currentSection = "profile" }: SettingsNavProps) {
   return (
     <nav className="space-y-1">
       {settingsSections.map((section) => {
@@ -29,19 +39,36 @@ export function SettingsNav() {
             key={section.name}
             href={`/dashboard/settings?section=${section.param}`}
             className={cn(
-              "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-start rounded-lg border px-4 py-3 transition-all",
               isActive
-                ? "bg-blue-50 text-blue-700"
-                : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                ? "border-blue-200 bg-blue-50"
+                : "border-transparent hover:bg-gray-50"
             )}
           >
             <Icon
               className={cn(
-                "mr-3 h-5 w-5",
-                isActive ? "text-blue-700" : "text-gray-400"
+                "mr-3 mt-0.5 h-5 w-5 flex-shrink-0",
+                isActive ? "text-blue-600" : "text-gray-400"
               )}
             />
-            {section.name}
+            <div className="min-w-0 flex-1">
+              <p
+                className={cn(
+                  "text-sm font-medium",
+                  isActive ? "text-blue-700" : "text-gray-900"
+                )}
+              >
+                {section.name}
+              </p>
+              <p
+                className={cn(
+                  "mt-0.5 text-xs",
+                  isActive ? "text-blue-600" : "text-gray-500"
+                )}
+              >
+                {section.description}
+              </p>
+            </div>
           </Link>
         );
       })}

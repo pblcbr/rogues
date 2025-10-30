@@ -1,11 +1,9 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import { Button } from "@/components/ui/button";
-import { PromptsTable } from "@/components/dashboard/prompts/prompts-table";
-import { AddPromptDialog } from "@/components/dashboard/prompts/add-prompt-dialog";
-import { GeneratePromptsButton } from "@/components/dashboard/prompts/generate-prompts-button";
+import { PromptsTableWrapper } from "@/components/dashboard/prompts/prompts-table-wrapper";
+import { CalculateKPIsButton } from "@/components/dashboard/prompts/calculate-kpis-button";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Plus, Target, HelpCircle } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 import type { Database } from "@/lib/supabase/types";
 
 /**
@@ -48,14 +46,89 @@ export default async function PromptsPage() {
     ascending: false,
   });
 
-  // Fetch plan to show cap
+  // Fetch plan and brand name to show cap
   const { data: ws } = await supabase
     .from("workspaces")
-    .select("plan")
+    .select("plan, brand_name")
     .eq("id", currentWorkspaceId || "")
     .single();
   const plan = ws?.plan || "growth";
   const cap = plan === "starter" ? 50 : 100;
+  const brandName = ws?.brand_name || "Your Brand";
+
+  // Fetch latest KPI snapshots for each prompt from prompt_kpi_snapshots table
+  // Get the most recent snapshot for each prompt (today or latest available)
+  const promptsWithKPIs = await Promise.all(
+    (prompts || []).map(async (prompt) => {
+      // Get the latest KPI snapshot for this prompt
+      const { data: latestSnapshot } = await supabase
+        .from("prompt_kpi_snapshots")
+        .select(
+          "visibility_score, mention_rate, citation_rate, avg_position, snapshot_date"
+        )
+        .eq("prompt_id", prompt.id)
+        .eq("workspace_id", currentWorkspaceId || "")
+        .order("snapshot_date", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!latestSnapshot) {
+        return {
+          ...prompt,
+          visibilityScore: null,
+          mentionRate: null,
+          citationRate: null,
+          avgPosition: null,
+          snapshotDate: null,
+        };
+      }
+
+      return {
+        ...prompt,
+        visibilityScore: latestSnapshot.visibility_score,
+        mentionRate: latestSnapshot.mention_rate,
+        citationRate: latestSnapshot.citation_rate,
+        avgPosition: latestSnapshot.avg_position?.toFixed(2) || null,
+        snapshotDate: latestSnapshot.snapshot_date,
+      };
+    })
+  );
+
+  // Find the most recent snapshot date across all prompts
+  const mostRecentSnapshotDate = promptsWithKPIs.reduce(
+    (latest, prompt) => {
+      if (!prompt.snapshotDate) return latest;
+      if (!latest) return prompt.snapshotDate;
+      return prompt.snapshotDate > latest ? prompt.snapshotDate : latest;
+    },
+    null as string | null
+  );
+
+  // Calculate days ago
+  let lastCalculatedText = "Never";
+  let lastCalculatedBadgeColor = "bg-gray-100 text-gray-600";
+
+  if (mostRecentSnapshotDate) {
+    const today = new Date().toISOString().split("T")[0];
+    const snapshotDate = new Date(mostRecentSnapshotDate);
+    const todayDate = new Date(today);
+    const diffTime = todayDate.getTime() - snapshotDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      lastCalculatedText = "Today";
+      lastCalculatedBadgeColor = "bg-green-100 text-green-700";
+    } else if (diffDays === 1) {
+      lastCalculatedText = "Yesterday";
+      lastCalculatedBadgeColor = "bg-yellow-100 text-yellow-700";
+    } else if (diffDays <= 7) {
+      lastCalculatedText = `${diffDays} days ago`;
+      lastCalculatedBadgeColor = "bg-orange-100 text-orange-700";
+    } else {
+      lastCalculatedText = `${diffDays} days ago`;
+      lastCalculatedBadgeColor = "bg-red-100 text-red-700";
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -78,61 +151,20 @@ export default async function PromptsPage() {
             <HelpCircle className="h-5 w-5 flex-shrink-0 cursor-help text-gray-400 hover:text-gray-600" />
           </Tooltip>
         </div>
-        <div className="flex items-center gap-2">
-          <GeneratePromptsButton workspaceId={currentWorkspaceId || ""} />
-          <AddPromptDialog workspaceId={currentWorkspaceId || ""}>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Prompt
-            </Button>
-          </AddPromptDialog>
-        </div>
+        <CalculateKPIsButton
+          workspaceId={currentWorkspaceId || ""}
+          regionId={currentRegionId}
+        />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="flex items-center space-x-2">
-            <Target className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-medium text-gray-600">Active</span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {(prompts?.filter((p) => p.is_active).length || 0).toString()}
-            <span className="ml-1 text-sm font-medium text-gray-500">
-              / {cap}
-            </span>
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="flex items-center space-x-2">
-            <div className="h-3 w-3 rounded-full bg-green-500"></div>
-            <span className="text-sm font-medium text-gray-600">Active</span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {prompts?.filter((p) => p.is_active).length || 0}
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="flex items-center space-x-2">
-            <div className="h-3 w-3 rounded-full bg-gray-400"></div>
-            <span className="text-sm font-medium text-gray-600">Inactive</span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {prompts?.filter((p) => !p.is_active).length || 0}
-          </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-gray-600">
-              Avg. Mentions
-            </span>
-          </div>
-          <p className="mt-2 text-2xl font-bold text-gray-900">32</p>
-        </div>
-      </div>
-
-      {/* Prompts Table */}
-      <PromptsTable prompts={prompts || []} />
+      {/* Prompts Table with KPIs */}
+      <PromptsTableWrapper
+        prompts={promptsWithKPIs || []}
+        cap={cap}
+        regionId={currentRegionId}
+        workspaceId={currentWorkspaceId || ""}
+        brandName={brandName}
+      />
     </div>
   );
 }

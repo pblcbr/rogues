@@ -27,7 +27,7 @@ export function StepRegion() {
   } = useRegistrationStore();
 
   const [region, setRegion] = useState(storedRegion || "United States");
-  const [language, setLanguage] = useState(storedLanguage || "English (en)");
+  const [language, setLanguage] = useState(storedLanguage || "English");
 
   const regions = [
     { value: "United States", label: "🇺🇸 United States", flag: "🇺🇸" },
@@ -49,16 +49,16 @@ export function StepRegion() {
   ];
 
   const languages = [
-    { value: "English (en)", label: "English (en)" },
-    { value: "Spanish (es)", label: "Spanish (es)" },
-    { value: "French (fr)", label: "French (fr)" },
-    { value: "German (de)", label: "German (de)" },
-    { value: "Italian (it)", label: "Italian (it)" },
-    { value: "Portuguese (pt)", label: "Portuguese (pt)" },
-    { value: "Dutch (nl)", label: "Dutch (nl)" },
-    { value: "Japanese (ja)", label: "Japanese (ja)" },
-    { value: "Chinese (zh)", label: "Chinese (zh)" },
-    { value: "Korean (ko)", label: "Korean (ko)" },
+    { value: "English", label: "English" },
+    { value: "Spanish", label: "Spanish" },
+    { value: "French", label: "French" },
+    { value: "German", label: "German" },
+    { value: "Italian", label: "Italian" },
+    { value: "Portuguese", label: "Portuguese" },
+    { value: "Dutch", label: "Dutch" },
+    { value: "Japanese", label: "Japanese" },
+    { value: "Chinese", label: "Chinese" },
+    { value: "Korean", label: "Korean" },
   ];
 
   const handleContinue = () => {
@@ -78,8 +78,8 @@ export function StepRegion() {
           Which region do you want to run your prompts in?
         </h1>
         <p className="text-muted-foreground">
-          Choose the primary region that your audience is located, so that you
-          get the most relevant results for your brand.
+          Choose the primary region that your audience is located. Later you
+          will be able to add more regions to your workspace.
         </p>
       </div>
 

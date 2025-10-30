@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AddRegionDialog } from "./add-region-dialog";
 
 interface WorkspaceRegion {
   id: string;
@@ -19,6 +20,7 @@ interface WorkspaceRegion {
 interface RegionSwitcherProps {
   currentWorkspaceId?: string;
   currentRegionId?: string | null;
+  onSwitchToNewRegion?: (regionId: string) => void;
 }
 
 /**
@@ -29,6 +31,7 @@ interface RegionSwitcherProps {
 export function RegionSwitcher({
   currentWorkspaceId,
   currentRegionId,
+  onSwitchToNewRegion,
 }: RegionSwitcherProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -47,6 +50,23 @@ export function RegionSwitcher({
     }
   }, [currentWorkspaceId]);
 
+  // Update isAllRegions when regions are loaded and currentRegion is found/not found
+  useEffect(() => {
+    if (!isFetching && regions.length > 0) {
+      // If currentRegionId is set but region not found, reset to all regions
+      if (currentRegionId && !currentRegion) {
+        console.warn(
+          `[RegionSwitcher] Current region ID ${currentRegionId} not found in regions list`
+        );
+        // Don't auto-switch, just reset the UI state
+      }
+      // If we have a currentRegion, make sure isAllRegions is false
+      if (currentRegion) {
+        setIsAllRegions(false);
+      }
+    }
+  }, [regions, currentRegionId, currentRegion, isFetching]);
+
   const fetchRegions = async () => {
     setIsFetching(true);
     try {
@@ -54,9 +74,17 @@ export function RegionSwitcher({
         `/api/workspace-regions?workspaceId=${currentWorkspaceId}`
       );
       const data = await response.json();
-      setRegions(data.regions || []);
+      const fetchedRegions = data.regions || [];
+      setRegions(fetchedRegions);
+      console.log("[RegionSwitcher] Fetched regions:", fetchedRegions);
+      console.log(
+        "[RegionSwitcher] Current region ID:",
+        currentRegionId,
+        "Found region:",
+        fetchedRegions.find((r: WorkspaceRegion) => r.id === currentRegionId)
+      );
     } catch (error) {
-      console.error("Error fetching regions:", error);
+      console.error("[RegionSwitcher] Error fetching regions:", error);
     } finally {
       setIsFetching(false);
     }
@@ -204,6 +232,35 @@ export function RegionSwitcher({
                   No regions found
                 </div>
               )}
+
+              {/* Add Region Button */}
+              <div className="border-t border-gray-200 p-2">
+                <AddRegionDialog
+                  workspaceId={currentWorkspaceId}
+                  currentRegions={regions.map((r) => r.region)}
+                  onRegionAdded={async (newRegionId) => {
+                    await fetchRegions();
+                    setIsOpen(false);
+
+                    // Automatically switch to the new region
+                    if (newRegionId && onSwitchToNewRegion) {
+                      onSwitchToNewRegion(newRegionId);
+                    } else if (newRegionId) {
+                      // Fallback: switch directly
+                      await handleSwitchRegion(newRegionId);
+                    }
+                  }}
+                >
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-sm"
+                    size="sm"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add region
+                  </Button>
+                </AddRegionDialog>
+              </div>
             </div>
           </>
         )}

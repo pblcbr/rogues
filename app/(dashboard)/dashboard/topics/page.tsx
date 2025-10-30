@@ -1,7 +1,7 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { type Database } from "@/lib/supabase/types";
-import { TopicsManagement } from "@/components/dashboard/topics/topics-management";
+import { TopicsTableWrapper } from "@/components/dashboard/topics/topics-table-wrapper";
 
 /**
  * Topics Page
@@ -18,15 +18,29 @@ export default async function TopicsPage() {
     return null;
   }
 
-  // Fetch workspace and current region
+  // Fetch workspace and current region with all necessary info
   const { data: profile } = await supabase
     .from("profiles")
-    .select("current_workspace_id, current_workspace_region_id")
+    .select(
+      "current_workspace_id, current_workspace_region_id, brand_website, brand_description"
+    )
     .eq("id", session.user.id)
     .single();
 
   const currentWorkspaceId = profile?.current_workspace_id;
   const currentRegionId = profile?.current_workspace_region_id;
+
+  // Fetch current region details if available
+  let currentRegion = null;
+  if (currentRegionId) {
+    const { data: regionData } = await supabase
+      .from("workspace_regions")
+      .select("region, language")
+      .eq("id", currentRegionId)
+      .single();
+
+    currentRegion = regionData;
+  }
 
   // Fetch topics with prompt counts (filter by region if selected)
   let topicsQuery = supabase
@@ -45,7 +59,7 @@ export default async function TopicsPage() {
 
   // Fetch prompt counts per topic
   const topicIds = topics?.map((t) => t.id) || [];
-  let promptCounts: Record<string, number> = {};
+  const promptCounts: Record<string, number> = {};
 
   if (topicIds.length > 0) {
     let promptsQuery = supabase
@@ -60,34 +74,61 @@ export default async function TopicsPage() {
 
     const { data: prompts } = await promptsQuery;
 
-    (prompts || []).forEach((p: any) => {
+    (prompts || []).forEach((p: { topic_id: string | null }) => {
       if (p.topic_id) {
         promptCounts[p.topic_id] = (promptCounts[p.topic_id] || 0) + 1;
       }
     });
   }
 
-  // Add prompt count to each topic
-  const topicsWithCounts = (topics || []).map((topic) => ({
+  // Fetch latest KPI snapshots for topics (today or most recent)
+  type KPISnapshot = Database["public"]["Tables"]["topic_kpi_snapshots"]["Row"];
+  const topicKPIs: Record<string, KPISnapshot> = {};
+
+  if (topicIds.length > 0) {
+    const { data: kpiSnapshots } = await supabase
+      .from("topic_kpi_snapshots")
+      .select("*")
+      .in("topic_id", topicIds)
+      .order("snapshot_date", { ascending: false });
+
+    // Get the latest snapshot for each topic
+    (kpiSnapshots || []).forEach((snapshot) => {
+      if (!topicKPIs[snapshot.topic_id]) {
+        topicKPIs[snapshot.topic_id] = snapshot;
+      }
+    });
+  }
+
+  // Add prompt count and KPIs to each topic
+  const topicsWithData = (topics || []).map((topic) => ({
     ...topic,
     promptCount: promptCounts[topic.id] || 0,
+    kpis: topicKPIs[topic.id] || null,
   }));
 
-  const selectedCount =
-    topicsWithCounts.filter((t) => t.is_selected).length || 0;
+  const selectedCount = topicsWithData.filter((t) => t.is_selected).length || 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Monitoring Topics</h1>
-        <p className="mt-2 text-gray-600">
-          Topics that generate monitoring prompts for your brand
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Monitoring Topics
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Topics that generate monitoring prompts for your brand visibility
+          </p>
+        </div>
       </div>
 
-      {/* Topics Grid */}
-      <TopicsManagement topics={topicsWithCounts} />
+      {/* Topics Table with Aggregated KPIs */}
+      <TopicsTableWrapper
+        topics={topicsWithData}
+        workspaceId={currentWorkspaceId || ""}
+        regionId={currentRegionId}
+      />
     </div>
   );
 }

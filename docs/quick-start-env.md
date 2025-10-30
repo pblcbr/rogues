@@ -1,6 +1,6 @@
 # Quick Start: Environment Setup
 
-This guide will help you get all environment variables configured for the Rogues platform.
+This guide will help you get all environment variables configured for the tacmind platform.
 
 ## Create Your .env.local File
 

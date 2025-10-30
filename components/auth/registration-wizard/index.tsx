@@ -84,7 +84,7 @@ export function RegistrationWizard() {
     <div className="w-full">
       {/* Logo */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold">Rogues</h2>
+        <h2 className="text-2xl font-bold">tacmind</h2>
       </div>
 
       {/* Current Step */}

@@ -1,6 +1,6 @@
 # Supabase Integration Guide
 
-This guide will help you integrate Supabase authentication into the Rogues platform.
+This guide will help you integrate Supabase authentication into the tacmind platform.
 
 ## Installation
 

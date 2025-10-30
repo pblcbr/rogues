@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const { workspaceId, name } = body;
+    const { workspaceId, name, regionId } = body;
 
     if (!workspaceId || !name) {
       return NextResponse.json(
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       .from("topics")
       .insert({
         workspace_id: workspaceId,
+        workspace_region_id: regionId,
         name,
         is_selected: true,
         source: "custom",
@@ -63,16 +64,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const {
-      topicId,
-      name,
-      description,
-      category,
-      priority,
-      keywords,
-      why_it_matters,
-      is_selected,
-    } = body;
+    const { topicId, name, is_selected } = body;
 
     if (!topicId) {
       return NextResponse.json(
@@ -81,14 +73,11 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updateData: any = {};
+    const updateData: Partial<{
+      name: string;
+      is_selected: boolean;
+    }> = {};
     if (name !== undefined) updateData.name = name;
-    if (description !== undefined) updateData.description = description;
-    if (category !== undefined) updateData.category = category;
-    if (priority !== undefined) updateData.priority = priority;
-    if (keywords !== undefined) updateData.keywords = keywords;
-    if (why_it_matters !== undefined)
-      updateData.why_it_matters = why_it_matters;
     if (is_selected !== undefined) updateData.is_selected = is_selected;
 
     const { data, error } = await supabase
@@ -100,6 +89,20 @@ export async function PATCH(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // If topic is being deactivated, deactivate all associated prompts
+    if (is_selected === false) {
+      const { error: promptsError } = await supabase
+        .from("monitoring_prompts")
+        .update({ is_active: false })
+        .eq("topic_id", topicId);
+
+      if (promptsError) {
+        console.error("Error deactivating prompts:", promptsError);
+        // Don't fail the request, just log the error
+        // The topic was already updated successfully
+      }
     }
 
     return NextResponse.json({ success: true, topic: data });

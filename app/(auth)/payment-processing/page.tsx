@@ -96,7 +96,12 @@ export default function PaymentProcessingPage() {
         const response = await fetch("/api/workspace/create-from-payment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId, planId }),
+          body: JSON.stringify({
+            sessionId,
+            planId,
+            region: finalRegion,
+            language: finalLanguage,
+          }),
         });
 
         const data = await response.json();

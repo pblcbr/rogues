@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
     console.log("[API] Initializing workspace for user:", user.id);
 
     const body = await request.json();
+    console.log("[API] Full request body:", JSON.stringify(body, null, 2));
+
     const {
       workspaceId,
       brandWebsite,
@@ -31,8 +33,8 @@ export async function POST(request: NextRequest) {
       region,
       language,
       visibilityAnalysis,
-      selectedTopics,
       generatedTopics,
+      selectedTopics,
       customTopics,
     } = body;
 
@@ -47,37 +49,87 @@ export async function POST(request: NextRequest) {
     console.log("[API] Brand Website:", brandWebsite);
     console.log("[API] Region:", region);
     console.log("[API] Language:", language);
-    console.log("[API] Selected Topics:", selectedTopics?.length || 0);
-
+    console.log("[API] Generated Topics:", generatedTopics);
+    console.log("[API] Selected Topics:", selectedTopics);
+    console.log("[API] Custom Topics:", customTopics);
     // Get default region for this workspace
-    const { data: defaultRegion } = await supabase
+    console.log("[API] Looking for default region for workspace:", workspaceId);
+
+    const { data: defaultRegion, error: regionError } = await supabase
       .from("workspace_regions")
       .select("id")
       .eq("workspace_id", workspaceId)
       .eq("is_default", true)
       .single();
 
-    if (!defaultRegion) {
-      console.error("[API] No default region found for workspace");
+    let regionToUse = defaultRegion;
+
+    if (regionError || !defaultRegion) {
+      console.error("[API] Error fetching default region:", regionError);
+
+      // Try to find any region for this workspace as fallback
+      const { data: anyRegion } = await supabase
+        .from("workspace_regions")
+        .select("id")
+        .eq("workspace_id", workspaceId)
+        .single();
+
+      if (anyRegion) {
+        console.log("[API] Using fallback region:", anyRegion.id);
+        regionToUse = anyRegion;
+      } else {
+        console.error("[API] No regions found for workspace");
+        return NextResponse.json(
+          { error: "No regions found for workspace" },
+          { status: 500 }
+        );
+      }
+    }
+
+    if (!regionToUse) {
+      console.error("[API] No region found for workspace");
       return NextResponse.json(
-        { error: "Default region not found" },
+        { error: "No region found for workspace" },
         { status: 500 }
       );
     }
 
-    console.log("[API] Default region ID:", defaultRegion.id);
+    console.log("[API] Using region ID:", regionToUse.id);
 
-    // 1. Update profile with registration data
+    // 1. Update workspace with region and language (NOT profile - region/language belong to workspace)
+    if (region || language) {
+      const workspaceUpdate: {
+        region?: string;
+        language?: string;
+        brand_website?: string | null;
+      } = {};
+
+      if (region) workspaceUpdate.region = region;
+      if (language) workspaceUpdate.language = language;
+      if (brandWebsite) workspaceUpdate.brand_website = brandWebsite;
+
+      const { error: workspaceUpdateError } = await supabase
+        .from("workspaces")
+        .update(workspaceUpdate)
+        .eq("id", workspaceId);
+
+      if (workspaceUpdateError) {
+        console.error(
+          "[API] ❌ Error updating workspace:",
+          workspaceUpdateError
+        );
+      } else {
+        console.log("[API] ✓ Workspace updated with region/language");
+      }
+    }
+
+    // 2. Update profile with registration data (but NOT region/language - those belong to workspace)
     console.log("[API] Attempting to update profile with data:", {
       userId: user.id,
       brandWebsite,
       brandDescription,
-      region,
-      language,
       hasBrandWebsite: !!brandWebsite,
       hasBrandDescription: !!brandDescription,
-      hasRegion: !!region,
-      hasLanguage: !!language,
     });
 
     const { error: profileError } = await supabase
@@ -85,11 +137,9 @@ export async function POST(request: NextRequest) {
       .update({
         brand_website: brandWebsite,
         brand_description: brandDescription,
-        region,
-        language,
         visibility_analysis: visibilityAnalysis,
         workspace_id: workspaceId,
-        current_workspace_region_id: defaultRegion.id,
+        current_workspace_region_id: regionToUse.id,
         onboarding_completed: true,
       })
       .eq("id", user.id);
@@ -106,65 +156,14 @@ export async function POST(request: NextRequest) {
 
     console.log("[API] ✓ Profile updated successfully");
 
-    // 2. Prepare topics data (merge generated and custom)
-    const allTopics = [];
-
-    // Add selected generated topics
-    if (generatedTopics && selectedTopics) {
-      const selectedGeneratedTopics = generatedTopics.filter((topic: any) =>
-        selectedTopics.includes(topic.name)
-      );
-      allTopics.push(
-        ...selectedGeneratedTopics.map((topic: any) => ({
-          workspace_id: workspaceId,
-          workspace_region_id: defaultRegion.id,
-          name: topic.name,
-          source: "ai_generated",
-          is_selected: true,
-        }))
-      );
-    }
-
-    // Add custom topics
-    if (customTopics && customTopics.length > 0) {
-      allTopics.push(
-        ...customTopics
-          .filter((topicName: string) => selectedTopics?.includes(topicName))
-          .map((topicName: string) => ({
-            workspace_id: workspaceId,
-            workspace_region_id: defaultRegion.id,
-            name: topicName,
-            source: "custom",
-            is_selected: true,
-          }))
-      );
-    }
-
-    console.log("[API] Total topics to insert:", allTopics.length);
-
-    // 3. Insert topics
-    if (allTopics.length > 0) {
-      const { error: topicsError } = await supabase
-        .from("topics")
-        .insert(allTopics);
-
-      if (topicsError) {
-        console.error("[API] Error inserting topics:", topicsError);
-        return NextResponse.json(
-          { error: "Failed to save topics" },
-          { status: 500 }
-        );
-      }
-
-      console.log("[API] ✓ Topics inserted");
-    }
+    // Note: Topics and prompts are now automatically generated when the default region is created
+    // in /api/workspace/create-from-payment, so we don't need to insert them here anymore.
 
     console.log("[API] ✅ Workspace initialization complete");
 
     return NextResponse.json({
       success: true,
       message: "Workspace initialized successfully",
-      topicsCount: allTopics.length,
     });
   } catch (error) {
     console.error("[API] Workspace initialization error:", error);

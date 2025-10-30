@@ -18,7 +18,9 @@ import { createClient } from "@/lib/supabase/client";
 
 interface AddPromptDialogProps {
   workspaceId: string;
+  regionId?: string | null;
   children: React.ReactNode;
+  onPromptAdded?: (prompt: any) => void;
 }
 
 /**
@@ -27,7 +29,9 @@ interface AddPromptDialogProps {
  */
 export function AddPromptDialog({
   workspaceId,
+  regionId,
   children,
+  onPromptAdded,
 }: AddPromptDialogProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -42,21 +46,53 @@ export function AddPromptDialog({
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from("monitoring_prompts").insert({
-        workspace_id: workspaceId,
-        prompt_text: promptText,
-        category,
-        is_active: isActive,
-      });
+      // If no regionId is provided, try to get the default region for this workspace
+      let regionIdToUse = regionId;
 
-      if (error) throw error;
+      if (!regionIdToUse) {
+        const { data: defaultRegion } = await supabase
+          .from("workspace_regions")
+          .select("id")
+          .eq("workspace_id", workspaceId)
+          .eq("is_default", true)
+          .single();
+
+        regionIdToUse = defaultRegion?.id;
+      }
+
+      const { data, error } = await supabase
+        .from("monitoring_prompts")
+        .insert({
+          workspace_id: workspaceId,
+          workspace_region_id: regionIdToUse || null,
+          prompt_text: promptText,
+          category,
+          is_active: isActive,
+          source: "custom",
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      // Call the callback to update the table immediately
+      if (onPromptAdded && data) {
+        onPromptAdded(data);
+      }
 
       setIsOpen(false);
       setPromptText("");
       router.refresh();
     } catch (error) {
       console.error("Error adding prompt:", error);
-      alert("Failed to add prompt. Please try again.");
+      alert(
+        `Failed to add prompt: ${
+          error instanceof Error ? error.message : "Please try again."
+        }`
+      );
     } finally {
       setIsLoading(false);
     }

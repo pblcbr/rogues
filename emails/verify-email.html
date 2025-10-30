@@ -13,7 +13,7 @@
       name="format-detection"
       content="telephone=no, date=no, address=no, email=no"
     />
-    <title>Verify your email - Rogues</title>
+    <title>Verify your email - tacmind</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
@@ -128,7 +128,7 @@
                     letter-spacing: -0.5px;
                   "
                 >
-                  Rogues
+                  tacmind
                 </h1>
                 <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b">
                   Answer Engine Optimization Platform
@@ -205,67 +205,88 @@
                           line-height: 1.6;
                         "
                       >
-                        Thanks for signing up! Please verify your email address
+                        Thanks for signing up! Use the verification code below
                         to complete your registration and start optimizing your
                         brand visibility in AI search engines.
                       </p>
                     </td>
                   </tr>
 
-                  <!-- CTA Button -->
+                  <!-- OTP Code Display -->
                   <tr>
                     <td align="center" style="padding: 0 40px 32px 40px">
-                      <a
-                        href="{{ .ConfirmationURL }}"
-                        class="button"
+                      <div
                         style="
+                          background-color: #f8fafc;
+                          border: 2px dashed #cbd5e1;
+                          border-radius: 12px;
+                          padding: 32px;
                           display: inline-block;
-                          background-color: #0f172a;
-                          color: #ffffff;
-                          text-decoration: none;
-                          padding: 16px 32px;
+                        "
+                      >
+                        <p
+                          style="
+                            margin: 0 0 12px 0;
+                            font-size: 14px;
+                            color: #64748b;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                          "
+                        >
+                          Your verification code:
+                        </p>
+                        <div
+                          style="
+                            font-size: 48px;
+                            font-weight: 700;
+                            color: #0f172a;
+                            letter-spacing: 8px;
+                            font-family: &quot;Courier New&quot;, monospace;
+                            text-align: center;
+                          "
+                        >
+                          {{ .Token }}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Instructions -->
+                  <tr>
+                    <td style="padding: 0 40px 32px 40px">
+                      <div
+                        style="
+                          background-color: #eff6ff;
+                          border-left: 4px solid #3b82f6;
+                          padding: 20px;
                           border-radius: 6px;
-                          font-weight: 600;
-                          font-size: 16px;
                         "
                       >
-                        Verify Email Address
-                      </a>
-                    </td>
-                  </tr>
-
-                  <!-- Divider -->
-                  <tr>
-                    <td style="padding: 0 40px">
-                      <div style="height: 1px; background-color: #e2e8f0"></div>
-                    </td>
-                  </tr>
-
-                  <!-- Alternative Link -->
-                  <tr>
-                    <td style="padding: 32px 40px">
-                      <p
-                        style="
-                          margin: 0 0 16px 0;
-                          font-size: 14px;
-                          color: #64748b;
-                          line-height: 1.6;
-                        "
-                      >
-                        If the button doesn't work, copy and paste this link
-                        into your browser:
-                      </p>
-                      <a
-                        href="{{ .ConfirmationURL }}"
-                        style="
-                          color: #3b82f6;
-                          text-decoration: none;
-                          word-break: break-all;
-                          font-size: 14px;
-                        "
-                      >
-                        {{ .ConfirmationURL }}
-                      </a>
+                        <p
+                          style="
+                            margin: 0 0 8px 0;
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: #1e40af;
+                          "
+                        >
+                          How to verify:
+                        </p>
+                        <ol
+                          style="
+                            margin: 0;
+                            padding-left: 20px;
+                            color: #1e3a8a;
+                            font-size: 14px;
+                            line-height: 1.8;
+                          "
+                        >
+                          <li>Copy the 6-digit code above</li>
+                          <li>Return to the registration page</li>
+                          <li>Enter the code in the verification field</li>
+                        </ol>
+                      </div>
                     </td>
                   </tr>
 
@@ -288,9 +309,10 @@
                             line-height: 1.5;
                           "
                         >
-                          <strong>Security note:</strong> This link will expire
-                          in 24 hours. If you didn't request this verification,
-                          please ignore this email.
+                          <strong>Security note:</strong> This code will expire
+                          in 24 hours. Never share this code with anyone. If you
+                          didn't request this verification, please ignore this
+                          email.
                         </p>
                       </div>
                     </td>
@@ -303,13 +325,13 @@
             <tr>
               <td align="center" style="padding-top: 32px">
                 <p style="margin: 0 0 8px 0; font-size: 14px; color: #64748b">
-                  This email was sent by <strong>Rogues</strong>
+                  This email was sent by <strong>tacmind</strong>
                 </p>
                 <p style="margin: 0 0 16px 0; font-size: 13px; color: #94a3b8">
                   If you have any questions, please contact our support team.
                 </p>
                 <p style="margin: 0; font-size: 12px; color: #cbd5e1">
-                  © 2025 Rogues. All rights reserved.
+                  © 2025 tacmind. All rights reserved.
                 </p>
               </td>
             </tr>

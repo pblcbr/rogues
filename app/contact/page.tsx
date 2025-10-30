@@ -202,10 +202,10 @@ export default function ContactPage() {
               <p className="text-center text-sm text-gray-400">
                 You can also email us at{" "}
                 <a
-                  href="mailto:sales@rogues.com"
+                  href="mailto:sales@tacmind.com"
                   className="text-white underline hover:text-gray-300"
                 >
-                  sales@rogues.com
+                  sales@tacmind.com
                 </a>
               </p>
             </form>

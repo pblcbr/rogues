@@ -25,9 +25,15 @@ import { useRouter } from "next/navigation";
 
 interface AddTopicDialogProps {
   workspaceId: string;
+  regionId?: string;
+  children?: React.ReactNode;
 }
 
-export function AddTopicDialog({ workspaceId }: AddTopicDialogProps) {
+export function AddTopicDialog({
+  workspaceId,
+  regionId,
+  children,
+}: AddTopicDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -54,6 +60,7 @@ export function AddTopicDialog({ workspaceId }: AddTopicDialogProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId,
+          regionId,
           name: formData.name,
           description: formData.description,
           why_it_matters: formData.why_it_matters,
@@ -85,10 +92,12 @@ export function AddTopicDialog({ workspaceId }: AddTopicDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Topic
-        </Button>
+        {children || (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Topic
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] w-[90vw] max-w-4xl">
         <DialogHeader>

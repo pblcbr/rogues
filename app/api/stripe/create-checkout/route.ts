@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[CHECKOUT] ✓ User authenticated:", user.id);
 
-    // Save registration data to profile before creating checkout
+    // Save registration data to profile before creating checkout (but NOT region/language - those belong to workspace)
     // This ensures we have the data even if webhook fails
     if (registrationData) {
       console.log("[CHECKOUT] Saving registration data to profile...");
@@ -73,8 +73,7 @@ export async function POST(request: NextRequest) {
         .update({
           brand_website: registrationData.brandWebsite,
           brand_description: registrationData.brandDescription,
-          region: registrationData.region,
-          language: registrationData.language,
+          // Note: region and language are NOT saved to profile - they belong to workspace
           visibility_analysis: registrationData.visibilityAnalysis,
         })
         .eq("id", user.id);

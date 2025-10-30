@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AddWorkspaceDialog } from "./add-workspace-dialog";
+import { useAddWorkspaceModalStore } from "./add-workspace-modal-store";
 
 interface Workspace {
   workspace_id: string;
@@ -44,8 +44,30 @@ export function WorkspaceSwitcher({
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const hasFetchedDirectly = useRef(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const currentWorkspace = workspaces.find((w) => w.is_current);
+  const { open } = useAddWorkspaceModalStore();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   // Fetch workspaces on mount
   useEffect(() => {
@@ -197,7 +219,7 @@ export function WorkspaceSwitcher({
   // Show workspace switcher for everyone
   return (
     <div className="border-b border-gray-200 px-4 py-4">
-      <div className="space-y-3">
+      <div ref={dropdownRef} className="space-y-3">
         {/* Current Workspace Selector */}
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -298,24 +320,17 @@ export function WorkspaceSwitcher({
 
             {/* Add Workspace Button */}
             <div className="border-t border-gray-200 p-2">
-              <AddWorkspaceDialog
-                onWorkspaceAdded={() => {
-                  console.log(
-                    "[WorkspaceSwitcher] Workspace added, refreshing..."
-                  );
-                  // Just refresh from RPC
-                  fetchWorkspaces();
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm"
+                size="sm"
+                onClick={() => {
+                  open();
                 }}
               >
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start text-sm"
-                  size="sm"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add workspace
-                </Button>
-              </AddWorkspaceDialog>
+                <Plus className="mr-2 h-4 w-4" />
+                Add workspace
+              </Button>
             </div>
           </div>
         )}

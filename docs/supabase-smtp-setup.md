@@ -1,6 +1,6 @@
 # Supabase SMTP Configuration Guide
 
-This guide explains how to configure Gmail SMTP for Supabase email authentication in the Rogues platform.
+This guide explains how to configure Gmail SMTP for Supabase email authentication in the tacmind platform.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ This guide explains how to configure Gmail SMTP for Supabase email authenticatio
 
 ```
 Sender email:     your-email@yourdomain.com
-Sender name:      Rogues
+Sender name:      tacmind
 
 SMTP Configuration:
 Host:             smtp.gmail.com

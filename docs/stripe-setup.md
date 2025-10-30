@@ -1,6 +1,6 @@
 # Stripe Integration Setup
 
-This guide explains how to configure Stripe payments for the Rogues platform.
+This guide explains how to configure Stripe payments for the tacmind platform.
 
 ## Prerequisites
 

@@ -72,6 +72,8 @@ export async function POST(request: NextRequest) {
 
         const userId = session.client_reference_id || session.metadata?.userId;
         const planId = session.metadata?.planId;
+        const workspaceId =
+          session.metadata?.workspaceId || session.client_reference_id; // workspaceId can be in metadata or client_reference_id
 
         if (!userId) {
           console.error("[STRIPE WEBHOOK] ❌ No userId in session");
@@ -81,52 +83,97 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        console.log("[STRIPE WEBHOOK] Creating workspace for user:", userId);
-        console.log("[STRIPE WEBHOOK] Plan:", planId);
-
-        // Get user profile
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
-
-        if (profileError || !profile) {
-          console.error("[STRIPE WEBHOOK] ❌ Profile not found:", profileError);
-          return NextResponse.json(
-            { error: "Profile not found" },
-            { status: 404 }
+        // Check if this is an existing workspace update or new workspace creation
+        let workspace;
+        if (workspaceId && workspaceId !== userId) {
+          // workspaceId exists and is different from userId - this is an existing workspace
+          console.log(
+            "[STRIPE WEBHOOK] Updating existing workspace:",
+            workspaceId
           );
+          console.log("[STRIPE WEBHOOK] Plan:", planId);
+
+          // Update existing workspace with subscription_id
+          const { data: updatedWorkspace, error: updateError } = await supabase
+            .from("workspaces")
+            .update({
+              stripe_subscription_id: session.subscription as string,
+              stripe_customer_id: session.customer as string, // Ensure customer_id is set
+            })
+            .eq("id", workspaceId)
+            .eq("owner_id", userId)
+            .select()
+            .single();
+
+          if (updateError || !updatedWorkspace) {
+            console.error(
+              "[STRIPE WEBHOOK] ❌ Workspace update failed:",
+              updateError
+            );
+            return NextResponse.json(
+              { error: "Failed to update workspace" },
+              { status: 500 }
+            );
+          }
+
+          workspace = updatedWorkspace;
+          console.log("[STRIPE WEBHOOK] ✓ Workspace updated:", workspace.id);
+        } else {
+          // No workspaceId in metadata - this is a new workspace (registration flow)
+          console.log(
+            "[STRIPE WEBHOOK] Creating new workspace for user:",
+            userId
+          );
+          console.log("[STRIPE WEBHOOK] Plan:", planId);
+
+          // Get user profile
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", userId)
+            .single();
+
+          if (profileError || !profile) {
+            console.error(
+              "[STRIPE WEBHOOK] ❌ Profile not found:",
+              profileError
+            );
+            return NextResponse.json(
+              { error: "Profile not found" },
+              { status: 404 }
+            );
+          }
+
+          console.log("[STRIPE WEBHOOK] ✓ Profile found:", profile.email);
+
+          // Create workspace
+          const { data: newWorkspace, error: workspaceError } = await supabase
+            .from("workspaces")
+            .insert({
+              name: `${profile.first_name}'s Workspace`,
+              domain: profile.company_domain,
+              owner_id: userId,
+              plan: planId || "growth",
+              stripe_customer_id: session.customer as string,
+              stripe_subscription_id: session.subscription as string,
+            })
+            .select()
+            .single();
+
+          if (workspaceError) {
+            console.error(
+              "[STRIPE WEBHOOK] ❌ Workspace creation failed:",
+              workspaceError
+            );
+            return NextResponse.json(
+              { error: "Failed to create workspace" },
+              { status: 500 }
+            );
+          }
+
+          workspace = newWorkspace;
+          console.log("[STRIPE WEBHOOK] ✓ Workspace created:", workspace.id);
         }
-
-        console.log("[STRIPE WEBHOOK] ✓ Profile found:", profile.email);
-
-        // Create workspace
-        const { data: workspace, error: workspaceError } = await supabase
-          .from("workspaces")
-          .insert({
-            name: `${profile.first_name}'s Workspace`,
-            domain: profile.company_domain,
-            owner_id: userId,
-            plan: planId || "growth",
-            stripe_customer_id: session.customer as string,
-            stripe_subscription_id: session.subscription as string,
-          })
-          .select()
-          .single();
-
-        if (workspaceError) {
-          console.error(
-            "[STRIPE WEBHOOK] ❌ Workspace creation failed:",
-            workspaceError
-          );
-          return NextResponse.json(
-            { error: "Failed to create workspace" },
-            { status: 500 }
-          );
-        }
-
-        console.log("[STRIPE WEBHOOK] ✓ Workspace created:", workspace.id);
 
         // Ensure user is added to workspace_members
         // Try to insert, but don't fail if it already exists or RLS blocks it
@@ -219,6 +266,70 @@ export async function POST(request: NextRequest) {
             "[STRIPE WEBHOOK] ⚠️ Could not update workspace_id:",
             err
           );
+        }
+
+        // Create default workspace region if it doesn't exist (only for new workspaces)
+        if (!workspaceId) {
+          // This is a new workspace, ensure default region exists
+          try {
+            const { data: existingRegion } = await supabase
+              .from("workspace_regions")
+              .select("id")
+              .eq("workspace_id", workspace.id)
+              .eq("is_default", true)
+              .single();
+
+            if (!existingRegion) {
+              // Get region/language from workspace or use defaults
+              const regionToUse = workspace.region || "United States";
+              const languageToUse = workspace.language || "English";
+
+              const { data: newRegion, error: regionError } = await supabase
+                .from("workspace_regions")
+                .insert({
+                  workspace_id: workspace.id,
+                  region: regionToUse,
+                  language: languageToUse,
+                  is_default: true,
+                })
+                .select("id")
+                .single();
+
+              if (regionError) {
+                console.error(
+                  "[STRIPE WEBHOOK] ⚠️ Failed to create default region:",
+                  regionError
+                );
+              } else if (newRegion) {
+                console.log(
+                  "[STRIPE WEBHOOK] ✓ Default region created:",
+                  newRegion.id
+                );
+
+                // Update profile with region ID
+                await supabase
+                  .from("profiles")
+                  .update({ current_workspace_region_id: newRegion.id })
+                  .eq("id", userId);
+              }
+            } else {
+              console.log(
+                "[STRIPE WEBHOOK] ✓ Default region already exists:",
+                existingRegion.id
+              );
+              // Update profile with existing region ID
+              await supabase
+                .from("profiles")
+                .update({ current_workspace_region_id: existingRegion.id })
+                .eq("id", userId);
+            }
+          } catch (err) {
+            console.error(
+              "[STRIPE WEBHOOK] ⚠️ Error creating default region:",
+              err
+            );
+            // Don't fail the webhook if region creation fails
+          }
         }
 
         // Try to update onboarding_completed (always exists in schema)

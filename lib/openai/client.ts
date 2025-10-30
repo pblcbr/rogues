@@ -19,6 +19,6 @@ export const openai = new Proxy({} as OpenAI, {
         apiKey: process.env.OPENAI_API_KEY,
       });
     }
-    return (_openai as any)[prop];
+    return _openai[prop as keyof OpenAI] as unknown as OpenAI[keyof OpenAI];
   },
 });

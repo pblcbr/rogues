@@ -17,11 +17,11 @@ export default function TermsPage() {
           <div className="space-y-8 text-gray-300">
             <p className="leading-relaxed">
               This Master Subscription Agreement ("Agreement") is between Cooper
-              Square Technologies Inc. (dba Rogues) ("Rogues") and the entity
-              identified as "Customer" in the order form signed by Rogues and
-              Customer, the checkout page on Rogues's website, or the order
-              confirmation email from Rogues, in each case referencing this
-              Agreement (the "Order"). Rogues and Customer are each a "Party"
+              Square Technologies Inc. (dba tacmind) ("tacmind") and the entity
+              identified as "Customer" in the order form signed by tacmind and
+              Customer, the checkout page on tacmind's website, or the order
+              confirmation email from tacmind, in each case referencing this
+              Agreement (the "Order"). tacmind and Customer are each a "Party"
               and, collectively, the "Parties." Capitalized terms used but not
               defined in this Agreement will have the meanings set forth in the
               Order. The Parties hereto agree as follows:
@@ -33,9 +33,9 @@ export default function TermsPage() {
                 1. Overview
               </h2>
               <p className="leading-relaxed">
-                Subject to the terms and conditions of this Agreement, Rogues
-                will make available to Customer Rogues's software-as-a-service
-                platform available at https://www.rogues.com, which provides
+                Subject to the terms and conditions of this Agreement, tacmind
+                will make available to Customer tacmind's software-as-a-service
+                platform available at https://www.tacmind.com, which provides
                 services related to the analysis of certain third-party
                 artificial intelligence platforms' ("AI Platforms") treatment of
                 specified products, services, and brand assets, which may
@@ -91,25 +91,25 @@ export default function TermsPage() {
                   </h3>
                   <p className="leading-relaxed">
                     "User" means an employee or contractor of Customer that
-                    Customer allows to use the applicable Rogues Technology on
-                    Customer's behalf, using the mechanisms designated by Rogues
-                    ("Log-in Credentials"). Rogues shall not permit the total
-                    number of Users who have accessed or used the Rogues
+                    Customer allows to use the applicable tacmind Technology on
+                    Customer's behalf, using the mechanisms designated by
+                    tacmind ("Log-in Credentials"). tacmind shall not permit the
+                    total number of Users who have accessed or used the tacmind
                     Technology during the Term to exceed the maximum User
                     quantity specified in the applicable Order. Customer will
-                    not make available the Rogues Technology to any person or
+                    not make available the tacmind Technology to any person or
                     entity other than Users. Each User must keep its Log-in
                     Credentials confidential and not share them with anyone
                     else. Customer is responsible for its Users' compliance with
                     this Agreement and all actions taken through their Log-in
                     Credentials (excluding misuse of the Log-in Credentials
-                    caused by Rogues's breach of this Agreement). Customer will
-                    promptly notify Rogues if it becomes aware of any compromise
-                    of any Log-in Credentials. Rogues may collect, access, use,
-                    disclose, transfer, transmit, store, host, or otherwise
-                    process ("Process") Log-in Credentials in connection with
-                    Rogues's provision of the Services or for Rogues's internal
-                    business purposes.
+                    caused by tacmind's breach of this Agreement). Customer will
+                    promptly notify tacmind if it becomes aware of any
+                    compromise of any Log-in Credentials. tacmind may collect,
+                    access, use, disclose, transfer, transmit, store, host, or
+                    otherwise process ("Process") Log-in Credentials in
+                    connection with tacmind's provision of the Services or for
+                    tacmind's internal business purposes.
                   </p>
                 </div>
 
@@ -122,31 +122,31 @@ export default function TermsPage() {
                     directly or indirectly, do any of the following: (a) provide
                     access to, distribute, sell, or sublicense the Services, or
                     related content or technology provided by or on behalf of
-                    Rogues (collectively, "Rogues Technology") to a third party
-                    (other than Users); (b) use the Rogues Technology to develop
-                    a similar or competing product or service or to provide
-                    products or services to a third party; (c) reverse engineer,
-                    decompile, disassemble, or seek to access the source code or
-                    non-public APIs to the Rogues Technology, except to the
-                    extent such a restriction is not permitted under applicable
-                    Law (and then only with prior notice to Rogues); (d) modify
-                    or create derivative works of the Rogues Technology or copy
-                    any element of the Rogues Technology; (e) remove or obscure
-                    any proprietary notices in the Rogues Technology; (f)
-                    publish benchmarks or performance information about the
-                    Rogues Technology; (g) interfere with the operation of the
-                    Rogues Technology, circumvent any access restrictions, or
-                    conduct any security or vulnerability test of the Rogues
-                    Technology; (h) transmit any viruses or other harmful
-                    materials to the Rogues Technology; (i) use the Rogues
-                    Technology to take any action that risks harm to others; (j)
-                    intentionally harm the security, availability, or integrity
-                    of the Rogues Technology; or (k) access or use the Rogues
-                    Technology in a manner that violates any applicable relevant
-                    local, state, federal or international laws, regulations and
-                    conventions, including those related to data privacy or data
-                    transfer, international communications, or export of data
-                    ("Law").
+                    tacmind (collectively, "tacmind Technology") to a third
+                    party (other than Users); (b) use the tacmind Technology to
+                    develop a similar or competing product or service or to
+                    provide products or services to a third party; (c) reverse
+                    engineer, decompile, disassemble, or seek to access the
+                    source code or non-public APIs to the tacmind Technology,
+                    except to the extent such a restriction is not permitted
+                    under applicable Law (and then only with prior notice to
+                    tacmind); (d) modify or create derivative works of the
+                    tacmind Technology or copy any element of the tacmind
+                    Technology; (e) remove or obscure any proprietary notices in
+                    the tacmind Technology; (f) publish benchmarks or
+                    performance information about the tacmind Technology; (g)
+                    interfere with the operation of the tacmind Technology,
+                    circumvent any access restrictions, or conduct any security
+                    or vulnerability test of the tacmind Technology; (h) transmit
+                    any viruses or other harmful materials to the tacmind
+                    Technology; (i) use the tacmind Technology to take any
+                    action that risks harm to others; (j) intentionally harm the
+                    security, availability, or integrity of the tacmind
+                    Technology; or (k) access or use the tacmind Technology in a
+                    manner that violates any applicable relevant local, state,
+                    federal or international laws, regulations and conventions,
+                    including those related to data privacy or data transfer,
+                    international communications, or export of data ("Law").
                   </p>
                 </div>
               </div>
@@ -166,9 +166,9 @@ export default function TermsPage() {
                   <p className="leading-relaxed">
                     Except for the limited licenses granted in this Agreement,
                     (a) nothing in this Agreement will be understood to grant
-                    Rogues any rights in or to Customer Data (defined below) and
-                    (b) nothing in this Agreement will be understood to grant
-                    Customer any rights in or to Rogues Technology.
+                    tacmind any rights in or to Customer Data (defined below)
+                    and (b) nothing in this Agreement will be understood to
+                    grant Customer any rights in or to tacmind Technology.
                   </p>
                 </div>
 
@@ -177,21 +177,21 @@ export default function TermsPage() {
                     3.2. Use of Customer Data
                   </h3>
                   <p className="leading-relaxed">
-                    Customer hereby grants Rogues a non-exclusive, worldwide,
+                    Customer hereby grants tacmind a non-exclusive, worldwide,
                     royalty-free, fully paid-up, non-sublicensable (except to
                     contractors and service providers), non-transferable (except
                     as set forth in Section 17.1) right to use, copy, store,
                     disclose, transmit, transfer, publicly display, modify,
                     create derivative works from, and Process any materials that
                     Customer (including its Users) inputs or makes available to
-                    Rogues, including any Inputs or other queries submitted
+                    tacmind, including any Inputs or other queries submitted
                     through the Services (collectively, "Customer Data") solely
                     as necessary: (a) to perform its obligations set forth in
                     this Agreement; (b) to derive or generate Telemetry; or (c)
                     to comply with applicable Laws. For the avoidance of doubt,
-                    Rogues does not train the artificial intelligence or machine
-                    learning models used in the Services, nor does it authorize
-                    any AI Platform to train its applicable artificial
+                    tacmind does not train the artificial intelligence or
+                    machine learning models used in the Services, nor does it
+                    authorize any AI Platform to train its applicable artificial
                     intelligence or machine learning models, on any Customer
                     Data.
                   </p>
@@ -202,15 +202,15 @@ export default function TermsPage() {
                     3.3. Output
                   </h3>
                   <p className="leading-relaxed">
-                    Rogues and its service providers collect and receive data by
-                    Processing Customer Data in connection with the Services.
+                    tacmind and its service providers collect and receive data
+                    by Processing Customer Data in connection with the Services.
                     This data generation and collection process may be
                     conducted, in whole or in part, using technologies that use
                     or rely upon artificial intelligence, machine learning
                     techniques, and other similar technology and features,
                     including AI Platforms. In response to Customer's (including
                     its Users') Inputs or other queries submitted through the
-                    Services, Rogues may make available to Customer through the
+                    Services, tacmind may make available to Customer through the
                     Services certain of these data, as well as reports,
                     information, content, and other materials (collectively,
                     "Output"). Customer acknowledges and agrees that Output may
@@ -231,7 +231,7 @@ export default function TermsPage() {
                     Customer's and Users' use of the Services, such as feature
                     usage, click-throughs, and dwell times, which information
                     does not identify Users, Customer, or any natural human
-                    persons as the source thereof. Rogues may use and exploit
+                    persons as the source thereof. tacmind may use and exploit
                     Telemetry without restriction.
                   </p>
                 </div>
@@ -249,7 +249,7 @@ export default function TermsPage() {
                 using the Services, including those that apply to Customer Data.
                 Customer represents and warrants that it has made all
                 disclosures, provided all notices, and has obtained all rights,
-                consents, and permissions necessary for Rogues to Process
+                consents, and permissions necessary for tacmind to Process
                 Customer Data and exercise the rights granted to it in this
                 Agreement without violating or infringing Laws, third-party
                 rights, or terms or policies that apply to the Customer Data.
@@ -262,16 +262,16 @@ export default function TermsPage() {
                 5. Suspension of Service
               </h2>
               <p className="leading-relaxed">
-                Rogues may immediately suspend Customer's access to any or all
-                of the Rogues Technology if: (a) Customer breaches Section 2.4
+                tacmind may immediately suspend Customer's access to any or all
+                of the tacmind Technology if: (a) Customer breaches Section 2.4
                 (Restrictions) or Section 4 (Customer Obligations); (b)
                 Customer's account is 30 days or more overdue; (c) changes to
-                Laws or new Laws require that Rogues suspend the Rogues
+                Laws or new Laws require that tacmind suspend the tacmind
                 Technology or otherwise may impose additional liability on the
-                part of Rogues; or (d) Customer's actions risk harm to any of
-                Rogues's other customers or the security, availability, or
-                integrity of any of the Rogues Technology. Where practicable,
-                Rogues will use reasonable efforts to provide Customer with
+                part of tacmind; or (d) Customer's actions risk harm to any of
+                tacmind's other customers or the security, availability, or
+                integrity of any of the tacmind Technology. Where practicable,
+                tacmind will use reasonable efforts to provide Customer with
                 prior notice of the suspension (email sufficing).
               </p>
             </section>
@@ -283,23 +283,23 @@ export default function TermsPage() {
               </h2>
               <p className="leading-relaxed">
                 The Services may support integration with third-party platforms,
-                add-ons, services, or products not provided by Rogues
+                add-ons, services, or products not provided by tacmind
                 ("Third-Party Platforms"). Use of any Third-Party Platforms
                 integrated with or made available through the Services is
                 subject to Customer's agreement with the relevant provider and
-                not this Agreement. Rogues does not control and has no liability
-                for Third-Party Platforms, including their security,
+                not this Agreement. tacmind does not control and has no
+                liability for Third-Party Platforms, including their security,
                 functionality, operation, availability, or interoperability with
-                the Rogues Technology or how the Third-Party Platforms or their
+                the tacmind Technology or how the Third-Party Platforms or their
                 providers use Customer Data. By enabling a Third-Party Platform
-                to interact with the Rogues Technology, Customer authorizes
-                Rogues to access and exchange Customer Data with such
+                to interact with the tacmind Technology, Customer authorizes
+                tacmind to access and exchange Customer Data with such
                 Third-Party Platform on Customer's behalf. To the extent an
-                integration with a Third-Party Platform requires that Rogues use
-                Customer's access credentials for such Third-Party Platform,
+                integration with a Third-Party Platform requires that tacmind
+                use Customer's access credentials for such Third-Party Platform,
                 Customer: (a) agrees to provide such credentials, (b) represents
                 and warrants that Customer has all necessary rights to provide
-                such credentials, and (c) authorizes Rogues to use such
+                such credentials, and (c) authorizes tacmind to use such
                 credentials on Customer's behalf in connection with the
                 provision of the Services.
               </p>
@@ -317,16 +317,16 @@ export default function TermsPage() {
                     7.1. Fees
                   </h3>
                   <p className="leading-relaxed">
-                    Customer will pay the fees for the Rogues Technology set
+                    Customer will pay the fees for the tacmind Technology set
                     forth in each Order ("Fees"). All Fees will be paid in U.S.
                     dollars unless otherwise provided in the Order. Fees are
                     invoiced as described on the schedule in the Order. Unless
                     the Order provides otherwise, all Fees are due within 30
                     days of the invoice date. Fees for Order Renewal Terms are
-                    at Rogues's then-current rates, regardless of any discounted
-                    pricing in a prior Order. All Fees are non-refundable except
-                    as may be set out in Section 8.2 (Product Warranty) and
-                    Section 12.4 (Mitigation).
+                    at tacmind's then-current rates, regardless of any
+                    discounted pricing in a prior Order. All Fees are
+                    non-refundable except as may be set out in Section 8.2
+                    (Product Warranty) and Section 12.4 (Mitigation).
                   </p>
                 </div>
 
@@ -338,7 +338,7 @@ export default function TermsPage() {
                     Customer is responsible for any sales, use, GST,
                     value-added, withholding, or similar taxes or levies that
                     apply to Orders, whether domestic or foreign, other than
-                    Rogues's income tax ("Taxes"). Fees are exclusive of all
+                    tacmind's income tax ("Taxes"). Fees are exclusive of all
                     Taxes.
                   </p>
                 </div>
@@ -391,23 +391,23 @@ export default function TermsPage() {
                     8.2. Product Warranty
                   </h3>
                   <p className="leading-relaxed">
-                    Rogues warrants to Customer that, during the Term, the
+                    tacmind warrants to Customer that, during the Term, the
                     Services will perform materially as described in the
                     applicable documentation made available to Customer by
-                    Rogues ("Documentation") and Rogues will not materially
+                    tacmind ("Documentation") and tacmind will not materially
                     decrease the overall functionality of the Services during
-                    the Term (the "Product Warranty"). If Rogues breaches the
+                    the Term (the "Product Warranty"). If tacmind breaches the
                     Product Warranty and Customer makes a written warranty claim
                     identifying in reasonable detail the nature of the breach,
-                    then Rogues will use reasonable efforts to correct the
+                    then tacmind will use reasonable efforts to correct the
                     breach and cause the Product Warranty to be satisfied. If
-                    Rogues cannot do so within 30 days after receipt of a
+                    tacmind cannot do so within 30 days after receipt of a
                     warranty claim that satisfies the requirements of the
                     immediately foregoing sentence, either Party may terminate
                     the Agreement as it relates to the non-conforming Service.
-                    Rogues will then refund to Customer any pre-paid, unused
+                    tacmind will then refund to Customer any pre-paid, unused
                     Fees for the terminated portion of the Term. This Section
-                    sets forth Customer's exclusive remedy and Rogues's entire
+                    sets forth Customer's exclusive remedy and tacmind's entire
                     liability for breach of the Product Warranty.
                   </p>
                 </div>
@@ -417,9 +417,9 @@ export default function TermsPage() {
                     8.3. Compliance with Laws
                   </h3>
                   <p className="leading-relaxed">
-                    Rogues represents and warrants to Customer that Rogues's
+                    tacmind represents and warrants to Customer that tacmind's
                     provision of the Services will comply with all laws and
-                    regulations applicable to Rogues in its delivery of the
+                    regulations applicable to tacmind in its delivery of the
                     Services.
                   </p>
                 </div>
@@ -431,21 +431,21 @@ export default function TermsPage() {
                   <p className="mb-4 font-semibold uppercase leading-relaxed">
                     EXCEPT AS EXPRESSLY PROVIDED IN SECTIONS 8.1 (MUTUAL
                     WARRANTIES), 8.2 (PRODUCT WARRANTIES), AND 8.3 (COMPLIANCE
-                    WITH LAWS), THE ROGUES TECHNOLOGY, ANY SUPPORT, OR TECHNICAL
-                    SERVICES, OUTPUT, AND ALL OTHER ROGUES SERVICES ARE PROVIDED
-                    "AS IS". ROGUES, ON ITS OWN BEHALF AND ON BEHALF OF ITS
-                    SUPPLIERS AND LICENSORS, MAKES NO OTHER WARRANTIES, WHETHER
-                    EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, INCLUDING
-                    WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-                    PURPOSE, TITLE, OR NONINFRINGEMENT.
+                    WITH LAWS), THE tacmind TECHNOLOGY, ANY SUPPORT, OR
+                    TECHNICAL SERVICES, OUTPUT, AND ALL OTHER tacmind SERVICES
+                    ARE PROVIDED "AS IS". tacmind, ON ITS OWN BEHALF AND ON
+                    BEHALF OF ITS SUPPLIERS AND LICENSORS, MAKES NO OTHER
+                    WARRANTIES, WHETHER EXPRESS, IMPLIED, STATUTORY, OR
+                    OTHERWISE, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS
+                    FOR A PARTICULAR PURPOSE, TITLE, OR NONINFRINGEMENT.
                   </p>
                   <p className="leading-relaxed">
-                    ROGUES DOES NOT WARRANT THAT CUSTOMER'S USE OF THE ROGUES
+                    tacmind DOES NOT WARRANT THAT CUSTOMER'S USE OF THE tacmind
                     TECHNOLOGY WILL BE UNINTERRUPTED OR ERROR-FREE OR THAT IT
-                    WILL MAINTAIN CUSTOMER DATA WITHOUT LOSS. ROGUES IS NOT
+                    WILL MAINTAIN CUSTOMER DATA WITHOUT LOSS. tacmind IS NOT
                     LIABLE FOR DELAYS, FAILURES, OR PROBLEMS INHERENT IN USE OF
                     THE INTERNET AND ELECTRONIC COMMUNICATIONS OR OTHER SYSTEMS
-                    OUTSIDE ROGUES'S CONTROL. CUSTOMER MAY HAVE OTHER STATUTORY
+                    OUTSIDE tacmind'S CONTROL. CUSTOMER MAY HAVE OTHER STATUTORY
                     RIGHTS, BUT ANY STATUTORILY REQUIRED WARRANTIES WILL BE
                     LIMITED TO THE SHORTEST LEGALLY PERMITTED PERIOD. Without
                     limiting the foregoing, Customer acknowledges and agrees
@@ -461,7 +461,7 @@ export default function TermsPage() {
                     the contrary, such similar or identical output will not be
                     understood to be Output hereunder), and (e) due to the
                     changing nature of AI Platforms and Third-Party Platforms,
-                    Rogues does not guarantee the Service will support or be
+                    tacmind does not guarantee the Service will support or be
                     compatible with specific AI Platforms and Third-Party
                     Platforms.
                   </p>
@@ -523,11 +523,11 @@ export default function TermsPage() {
                   </h3>
                   <p className="leading-relaxed">
                     Upon expiration or termination of this Agreement, Customer's
-                    rights to access, and Rogues's obligations to provide, the
-                    Rogues Technology will cease. Following the date of
-                    expiration or earlier termination of this Agreement, Rogues
+                    rights to access, and tacmind's obligations to provide, the
+                    tacmind Technology will cease. Following the date of
+                    expiration or earlier termination of this Agreement, tacmind
                     will promptly return or delete Customer Data and other
-                    Customer Confidential Information, provided that Rogues may
+                    Customer Confidential Information, provided that tacmind may
                     retain copies of Customer Data and other Confidential
                     Information (defined below) (a) as expressly agreed upon by
                     the Parties, (b) as necessary to comply with applicable law,
@@ -563,11 +563,11 @@ export default function TermsPage() {
                 10. Feedback
               </h2>
               <p className="leading-relaxed">
-                To the extent Customer provides Rogues with feedback (including
+                To the extent Customer provides tacmind with feedback (including
                 suggestions and comments for enhancements or functionality)
-                regarding the Rogues Technology, Output (including underlying
-                datasets), or Rogues's products, services, or other technology
-                ("Feedback"), Rogues has (a) sole discretion to determine
+                regarding the tacmind Technology, Output (including underlying
+                datasets), or tacmind's products, services, or other technology
+                ("Feedback"), tacmind has (a) sole discretion to determine
                 whether and how to proceed with Feedback and (b) the full and
                 unrestricted right to use or incorporate Feedback into any of
                 its products, services, technology, or other materials.
@@ -606,9 +606,9 @@ export default function TermsPage() {
                     PARTY'S (AND ITS SUPPLIERS' AND LICENSOR'S) ENTIRE LIABILITY
                     ARISING OUT OF OR RELATED TO THIS AGREEMENT WILL NOT EXCEED
                     IN AGGREGATE THE AMOUNTS PAID OR PAYABLE BY CUSTOMER TO
-                    ROGUES PURSUANT TO THIS AGREEMENT DURING THE 12 MONTHS PRIOR
-                    TO THE DATE ON WHICH THE APPLICABLE CLAIM GIVING RISE TO THE
-                    LIABILITY AROSE UNDER THIS AGREEMENT.
+                    tacmind PURSUANT TO THIS AGREEMENT DURING THE 12 MONTHS
+                    PRIOR TO THE DATE ON WHICH THE APPLICABLE CLAIM GIVING RISE
+                    TO THE LIABILITY AROSE UNDER THIS AGREEMENT.
                   </p>
                 </div>
 
@@ -648,14 +648,14 @@ export default function TermsPage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="mb-2 text-xl font-medium text-white">
-                    12.1. Indemnification by Rogues
+                    12.1. Indemnification by tacmind
                   </h3>
                   <p className="leading-relaxed">
-                    Rogues will defend, indemnify, and hold harmless Customer
+                    tacmind will defend, indemnify, and hold harmless Customer
                     against any damages and costs awarded against Customer
                     (including reasonable attorneys' fees) or agreed in a
-                    settlement by Rogues resulting from any third-party claim
-                    alleging that the Rogues Technology, when used by Customer
+                    settlement by tacmind resulting from any third-party claim
+                    alleging that the tacmind Technology, when used by Customer
                     in accordance with this Agreement, infringes or
                     misappropriates a third party's U.S. patent, copyright,
                     trademark, or trade secret.
@@ -667,13 +667,13 @@ export default function TermsPage() {
                     12.2. Indemnification by Customer
                   </h3>
                   <p className="leading-relaxed">
-                    Customer will indemnify and hold harmless and, at Rogues's
-                    request will defend, Rogues from and against any third-party
-                    claim, including any damages and costs awarded against
-                    Rogues (including reasonable attorneys' fees) or agreed in a
-                    settlement by Customer resulting from the claim, to the
-                    extent (a) alleging facts that, if true, would result in
-                    Customer's breach of Section 4 (Customer Obligations), or
+                    Customer will indemnify and hold harmless and, at tacmind's
+                    request will defend, tacmind from and against any
+                    third-party claim, including any damages and costs awarded
+                    against tacmind (including reasonable attorneys' fees) or
+                    agreed in a settlement by Customer resulting from the claim,
+                    to the extent (a) alleging facts that, if true, would result
+                    in Customer's breach of Section 4 (Customer Obligations), or
                     (b) relating to Customer's business practices or use of
                     Output.
                   </p>
@@ -694,7 +694,7 @@ export default function TermsPage() {
                     any claim without the indemnified party's prior consent if
                     settlement would require the indemnified party to take or
                     refrain from taking any action (other than relating to use
-                    of the Rogues Technology, when Rogues is the indemnifying
+                    of the tacmind Technology, when tacmind is the indemnifying
                     party).
                   </p>
                 </div>
@@ -707,12 +707,12 @@ export default function TermsPage() {
                     In response to an actual or potential claim relating to
                     infringement, misappropriation, or violation of intellectual
                     property rights, if required by settlement or injunction or
-                    as Rogues determines necessary to avoid material liability,
-                    Rogues may at its option: (a) procure rights for Customer's
-                    continued use of the applicable Rogues Technology; (b)
+                    as tacmind determines necessary to avoid material liability,
+                    tacmind may at its option: (a) procure rights for Customer's
+                    continued use of the applicable tacmind Technology; (b)
                     replace or modify the allegedly infringing portion of the
-                    applicable Rogues Technology to avoid infringement or
-                    misappropriation without reducing such Rogues Technology's
+                    applicable tacmind Technology to avoid infringement or
+                    misappropriation without reducing such tacmind Technology's
                     overall functionality; or (c) terminate this Agreement and
                     refund to Customer any pre-paid, unused Fees for the
                     terminated portion of the Term.
@@ -724,15 +724,15 @@ export default function TermsPage() {
                     12.5. Exceptions
                   </h3>
                   <p className="leading-relaxed">
-                    Rogues's obligations in this Section 12 do not apply: (a) to
-                    infringement or misappropriation resulting from Customer's
-                    modification of Rogues Technology or use of Rogues
-                    Technology in combination with items not provided by Rogues
-                    (including Third-Party Platforms or Customer Data); (b) to
-                    unauthorized use of the Rogues Technology; (c) if Customer
-                    settles or makes any admissions about a claim without
-                    Rogues's prior consent; or (d) to Trials and Betas or other
-                    free or evaluation use.
+                    tacmind's obligations in this Section 12 do not apply: (a)
+                    to infringement or misappropriation resulting from
+                    Customer's modification of tacmind Technology or use of
+                    tacmind Technology in combination with items not provided by
+                    tacmind (including Third-Party Platforms or Customer Data);
+                    (b) to unauthorized use of the tacmind Technology; (c) if
+                    Customer settles or makes any admissions about a claim
+                    without tacmind's prior consent; or (d) to Trials and Betas
+                    or other free or evaluation use.
                   </p>
                 </div>
 
@@ -742,7 +742,7 @@ export default function TermsPage() {
                   </h3>
                   <p className="font-semibold uppercase leading-relaxed">
                     THIS SECTION 12 SETS OUT CUSTOMER'S EXCLUSIVE REMEDY AND
-                    ROGUES'S ENTIRE LIABILITY REGARDING INFRINGEMENT OR
+                    tacmind's ENTIRE LIABILITY REGARDING INFRINGEMENT OR
                     MISAPPROPRIATION OF THIRD-PARTY INTELLECTUAL PROPERTY
                     RIGHTS.
                   </p>
@@ -767,10 +767,10 @@ export default function TermsPage() {
                     is designated by the disclosing party ("Discloser") as
                     proprietary or confidential or that should be reasonably
                     understood to be proprietary or confidential due to its
-                    nature or the circumstances of its disclosure. Rogues's
+                    nature or the circumstances of its disclosure. tacmind's
                     Confidential Information includes the terms and conditions
-                    of this Agreement and the Rogues Technology (including any
-                    technical or performance information about the Rogues
+                    of this Agreement and the tacmind Technology (including any
+                    technical or performance information about the tacmind
                     Technology). Customer's Confidential Information includes
                     Customer Data.
                   </p>
@@ -788,10 +788,10 @@ export default function TermsPage() {
                     Confidential Information to fulfill its obligations and
                     exercise its rights in this Agreement. At Discloser's
                     request, Recipient will delete all Confidential Information,
-                    except, in the case where Rogues is the Recipient, Rogues
+                    except, in the case where tacmind is the Recipient, tacmind
                     may retain the Customer's Confidential Information to the
-                    extent required to continue to provide the Rogues Technology
-                    as contemplated by this Agreement.
+                    extent required to continue to provide the tacmind
+                    Technology as contemplated by this Agreement.
                   </p>
                 </div>
 
@@ -860,21 +860,22 @@ export default function TermsPage() {
                 15. Trials and Betas
               </h2>
               <p className="mb-4 leading-relaxed">
-                If Customer receives access to Rogues Technology or features
+                If Customer receives access to tacmind Technology or features
                 thereof on a free or trial basis or as an alpha, beta, or early
                 access offering ("Trials and Betas"), use is permitted only for
                 Customer's internal evaluation during the period designated by
-                Rogues (or if not designated, 30 days). Trials and Betas are
+                tacmind (or if not designated, 30 days). Trials and Betas are
                 optional and either Party may terminate Trials and Betas at any
                 time for any reason. Trials and Betas may be inoperable,
-                incomplete, or include features that Rogues may never release,
-                and their features and performance information are Rogues's
+                incomplete, or include features that tacmind may never release,
+                and their features and performance information are tacmind's
                 Confidential Information.
               </p>
               <p className="font-semibold uppercase leading-relaxed">
-                NOTWITHSTANDING ANYTHING ELSE IN THIS AGREEMENT, ROGUES PROVIDES
-                NO WARRANTY, INDEMNITY, OR SUPPORT FOR TRIALS AND BETAS, AND ITS
-                LIABILITY FOR TRIALS AND BETAS WILL NOT EXCEED US$50.
+                NOTWITHSTANDING ANYTHING ELSE IN THIS AGREEMENT, tacmind
+                PROVIDES NO WARRANTY, INDEMNITY, OR SUPPORT FOR TRIALS AND
+                BETAS, AND ITS LIABILITY FOR TRIALS AND BETAS WILL NOT EXCEED
+                US$50.
               </p>
             </section>
 
@@ -884,7 +885,7 @@ export default function TermsPage() {
                 16. Publicity
               </h2>
               <p className="leading-relaxed">
-                Rogues may include Customer and its trademarks in Rogues's
+                tacmind may include Customer and its trademarks in tacmind's
                 customer lists and promotional materials but will cease further
                 use at Customer's written request.
               </p>
@@ -945,7 +946,7 @@ export default function TermsPage() {
                     earlier of the receipt of a confirmation email or one day
                     after sending if by email. Either Party may update its
                     address with notice to the other Party pursuant to this
-                    Section. Rogues may also send operational notices to
+                    Section. tacmind may also send operational notices to
                     Customer by email or through the Service.
                   </p>
                 </div>
@@ -958,7 +959,7 @@ export default function TermsPage() {
                     Certain features of the Services are governed by additional
                     product-specific terms which may be made available to
                     Customer from time to time, including the terms located at
-                    https://www.rogues.com/supplemental-terms ("Supplemental
+                    https://www.tacmind.com/supplemental-terms ("Supplemental
                     Terms"). Supplemental Terms governing any Services used by
                     or made available to Customer are deemed incorporated into
                     this Agreement.
@@ -992,10 +993,10 @@ export default function TermsPage() {
                     any amendments, modifications, or supplements to this
                     Agreement must be in writing and signed by each Party's
                     authorized representatives or, as appropriate, agreed
-                    through electronic means provided by Rogues. The terms in
+                    through electronic means provided by tacmind. The terms in
                     any Customer purchase order or business form will not amend
                     or modify this Agreement and are expressly rejected by
-                    Rogues; any of these Customer documents are for
+                    tacmind; any of these Customer documents are for
                     administrative purposes only and have no legal effect.
                   </p>
                 </div>
@@ -1037,8 +1038,8 @@ export default function TermsPage() {
                     17.9. Subcontractors
                   </h3>
                   <p className="leading-relaxed">
-                    Rogues may use subcontractors and permit them to exercise
-                    Rogues's rights, but Rogues remains responsible for their
+                    tacmind may use subcontractors and permit them to exercise
+                    tacmind's rights, but tacmind remains responsible for their
                     compliance with this Agreement and for its overall
                     performance under this Agreement.
                   </p>
@@ -1060,14 +1061,14 @@ export default function TermsPage() {
                   </h3>
                   <p className="leading-relaxed">
                     Customer will comply with all relevant U.S. and foreign
-                    export and import Laws in using any Rogues Technology.
+                    export and import Laws in using any tacmind Technology.
                     Customer: (a) represents and warrants that it is not listed
                     on any U.S. government list of prohibited or restricted
                     parties or located in (or a national of) a country that is
                     subject to a U.S. government embargo or that has been
                     designated by the U.S. government as a "terrorist
                     supporting" country; (b) agrees not to access or use the
-                    Rogues Technology in violation of any U.S. export embargo,
+                    tacmind Technology in violation of any U.S. export embargo,
                     prohibition, or restriction; and (c) will not submit to the
                     Services any information controlled under the U.S.
                     International Traffic in Arms Regulations.
@@ -1081,7 +1082,7 @@ export default function TermsPage() {
                   <p className="leading-relaxed">
                     The Services may incorporate third-party open-source
                     software ("OSS"), including as listed in the Documentation
-                    or otherwise disclosed by Rogues in writing. To the extent
+                    or otherwise disclosed by tacmind in writing. To the extent
                     required by the OSS license, that license will apply to the
                     OSS on a stand-alone basis instead of this Agreement.
                   </p>
@@ -1092,32 +1093,18 @@ export default function TermsPage() {
                     17.13. Government End-Users
                   </h3>
                   <p className="leading-relaxed">
-                    Elements of the Rogues Technology may include commercial
-                    computer software. If the user or licensee of the Rogues
+                    Elements of the tacmind Technology may include commercial
+                    computer software. If the user or licensee of the tacmind
                     Technology is an agency, department, or other entity of the
                     United States Government, the use, duplication,
                     reproduction, release, modification, disclosure, or transfer
-                    of the Rogues Technology or any related documentation of any
+                    of the tacmind Technology or any related documentation of any
                     kind, including technical data and manuals, is restricted by
                     the terms of this Agreement in accordance with Federal
                     Acquisition Regulation 12.212 for civilian purposes and
                     Defense Federal Acquisition Regulation Supplement 227.7202
-                    for military purposes. The Rogues Technology was developed
+                    for military purposes. The tacmind Technology was developed
                     fully at private expense. All other use is prohibited.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 text-xl font-medium text-white">
-                    17.14. Conflicts in Interpretation
-                  </h3>
-                  <p className="leading-relaxed">
-                    Inconsistencies or conflicts among the terms of this
-                    Agreement will be resolved in the following descending order
-                    of precedence: (a) the terms of an Order (provided that the
-                    terms of the Order will control only with respect to that
-                    Order); (b) the Supplemental Terms; and (c) any other
-                    provision of this Agreement.
                   </p>
                 </div>
               </div>

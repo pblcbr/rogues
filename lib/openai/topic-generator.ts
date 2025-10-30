@@ -137,47 +137,54 @@ export async function generateTopicsForDomain(
 
     const systemPrompt = `You are an AEO (Answer Engine Optimization) strategist specialized in identifying strategic TOPIC CATEGORIES for monitoring brand visibility in AI search engines (ChatGPT, Claude, Gemini, Perplexity, Bing Copilot).
 
-YOUR TASK:
-Generate high-level TOPICS (not individual prompts) that represent broad areas of buyer interest and search intent relevant to the given domain.
+YOUR GOAL:
+Generate topics that represent REAL SCENARIOS where customers would naturally ask questions in AI chat interfaces, and where the brand should appear in responses. These topics will generate monitoring prompts that measure actual brand visibility.
 
 WHAT IS A TOPIC:
-- A topic is a CATEGORY of related search queries, not a specific question
-- Each topic will later contain 5-15 specific prompts
-- Topics should represent distinct areas of the customer journey or business concern
-- Examples: "Brand Awareness & Recognition", "Product Comparisons", "Pricing Research", "Technical Integration", "Compliance & Security", "Use Case Discovery"
+- A topic is a SPECIFIC SCENARIO or USE CASE where buyers would ask questions in ChatGPT/Claude
+- Each topic represents a real-world situation where brand visibility matters
+- Topics should be concrete, specific to the industry/domain, not abstract categories
+- Each topic will generate 8-12 prompts that customers actually ask in LLMs
 
-QUALITY RULES:
-- Topics must be SPECIFIC to the domain's industry, not generic
-- Avoid bland terms like: "General Information", "Basic Services", "Standard Features"
-- Each topic should represent a distinct business value or buyer concern
-- Topics should cover different stages: awareness, consideration, decision, retention, advocacy
+CRITICAL RULES:
+- NO generic topics like "Brand Awareness", "General Information", "Basic Services"
+- Topics must be SPECIFIC scenarios tied to the domain's actual business
+- Think: "In what REAL situations would someone ask ChatGPT about this domain/brand?"
+- Focus on action-oriented scenarios: solving problems, making decisions, comparing options
+- Include industry-specific terminology, competitor names, technical terms relevant to the domain
+
+TOPIC QUALITY CRITERIA:
+1. SPECIFICITY: "NetSuite Invoice Automation for Manufacturing" NOT "Invoice Automation"
+2. CONTEXT: "Pricing for 50-person SaaS companies" NOT "Pricing Information"
+3. USE CASE: "Migrating from QuickBooks to Modern AP Software" NOT "Integration Topics"
+4. REALITY: Topics should reflect actual buyer journeys in this industry
+5. VISIBILITY OPPORTUNITY: Each topic should have scenarios where the brand could/should be mentioned
 
 COVERAGE REQUIREMENTS:
-- Mix of categories: awareness (2-3), consideration (2-3), decision (2-3), retention (1-2), advocacy (1-2)
-- Include competitive intelligence topics (comparisons, alternatives)
-- Include credibility topics (reviews, case studies, legitimacy)
-- Include solution-specific topics relevant to the domain
-- Consider regional/compliance topics when relevant
+- Problem-solving scenarios (how do I solve X with Y?)
+- Comparison scenarios (what's the best option for X? compare A vs B)
+- Decision scenarios (should I choose X or Y? what should I know about X?)
+- Implementation scenarios (how do I set up X? what do I need for X?)
+- Industry-specific scenarios (compliance, certifications, standards relevant to domain)
 
 OUTPUT:
-- First, produce a brief DOMAIN PROFILE (max 120 words) summarizing: category, ICPs, top use cases, key competitors, main differentiators
-- Then produce EXACTLY N topics following the JSON schema in the user message
-- Follow the JSON schema strictly
+- First, produce a DOMAIN PROFILE (max 120 words) analyzing: industry, target customers, main pain points, competitive landscape, key differentiators
+- Then produce EXACTLY N topics following the JSON schema
 
-EXAMPLES (DO NOT COPY - adapt to domain):
+EXAMPLES (DO NOT COPY - adapt based on domain context):
 
-For a B2B SaaS Invoice Automation:
-1. "Invoice Automation ROI & Business Case" | category: awareness | priority: high | 8-12 prompts
-2. "NetSuite & ERP Integration" | category: consideration | priority: high | 10-15 prompts  
-3. "Pricing & Implementation Costs" | category: decision | priority: high | 6-10 prompts
-4. "EU e-Invoicing Compliance (Peppol, EN16931)" | category: consideration | priority: medium | 8-12 prompts
-5. "Competitor Comparisons (vs Tipalti, Bill.com)" | category: consideration | priority: high | 10-15 prompts
+For a B2B SaaS Invoice Automation Tool:
+1. "ROI Calculation for Automated Invoice Processing in Mid-Market Companies" | category: awareness | priority: high
+2. "NetSuite vs SAP Invoice Automation Integration Options" | category: consideration | priority: high  
+3. "EU e-Invoicing Compliance Requirements & Solution Vendors" | category: consideration | priority: high
+4. "Implementation Timeline & Costs for AP Automation Tools" | category: decision | priority: high
+5. "Comparing Tipalti vs Bill.com for International Payment Processing" | category: consideration | priority: high
 
 For an E-commerce Platform:
-1. "Shopify Migration & Setup" | category: awareness | priority: high | 8-12 prompts
-2. "Payment Processing & Checkout Optimization" | category: consideration | priority: high | 10-15 prompts
-3. "Multi-Channel Integration (Amazon, eBay)" | category: consideration | priority: medium | 6-10 prompts
-4. "Platform Pricing & Transaction Fees" | category: decision | priority: high | 8-12 prompts`;
+1. "Shopify Store Migration Guide & Recommended Agencies" | category: awareness | priority: high
+2. "Best Payment Gateways for High-Volume D2C Brands" | category: consideration | priority: high
+3. "Multi-Channel Inventory Sync Solutions (Shopify, Amazon, eBay)" | category: consideration | priority: medium
+4. "E-commerce Platform Pricing Comparison for $1M+ Revenue Stores" | category: decision | priority: high`;
 
     const ctx = opts?.context;
     const regionsLanguages = ctx?.regions_languages
@@ -196,20 +203,29 @@ Known context (optional):
 - Known competitors (if any): ${ctx?.competitors || "infer from market"}
 
 TASK:
-1) Build a concise DOMAIN PROFILE (<=120 words).
-2) Generate EXACTLY ${count} TOPICS (not individual prompts) optimized for monitoring this brand in AI answer engines.
+1) Build a concise DOMAIN PROFILE (<=120 words) analyzing the business context.
+2) Generate EXACTLY ${count} SPECIFIC, ACTIONABLE TOPICS that represent real buyer scenarios.
 
-CATEGORY DISTRIBUTION (across the ${count} topics):
-- awareness: ${Math.max(2, Math.floor(count * 0.25))} topics
-- consideration: ${Math.max(2, Math.floor(count * 0.3))} topics
-- decision: ${Math.max(2, Math.floor(count * 0.25))} topics
-- retention: ${Math.max(1, Math.floor(count * 0.1))} topics
-- advocacy: ${Math.max(1, Math.floor(count * 0.1))} topics
+IMPORTANT: Each topic should be a SPECIFIC SCENARIO where:
+- A real customer would ask ChatGPT/Claude a question
+- The brand could/should appear in the AI's response
+- The scenario is concrete and tied to actual industry problems/solutions
 
-PRIORITY DISTRIBUTION:
-- At least ${Math.floor(count * 0.4)} topics should be "high" priority
-- Include competitive intelligence topics (high priority)
-- Include credibility/trust topics (medium/high priority)
+AVOID generic topics. FOCUS on specific, actionable scenarios.
+
+Think like a customer: What problems are they solving? What decisions are they making? What information do they need?
+
+CATEGORY GUIDANCE (distribute naturally):
+- awareness: scenarios where customers discover solutions to problems
+- consideration: scenarios where customers compare/evaluate options
+- decision: scenarios where customers make purchase decisions
+- retention: scenarios for existing customers
+- advocacy: scenarios where customers recommend/share
+
+PRIORITY GUIDANCE:
+- High priority: Scenarios where brand visibility directly impacts sales/conversions
+- Medium priority: Scenarios important for brand awareness/positioning
+- Low priority: Nice-to-have scenarios for comprehensive monitoring
 
 RETURN ONLY THIS JSON SCHEMA (no extra keys, no markdown):
 
